@@ -56,7 +56,7 @@ If you need a collection that can ONLY have integer values, you can extend
 Managur Collections with your own class as follows:
 
 ```php
-<?php declare(strict_types1);
+<?php declare(strict_types=1);
 
 use Managur\Collection\Collection;
 
@@ -75,7 +75,7 @@ Fail fast.
 Similar to enforcing a type for the values, you can also fix the index (or key)
 types:
 ```php
-<?php declare(strict_types1);
+<?php declare(strict_types=1);
 
 use Managur\Collection\Collection;
 
