@@ -1,6 +1,6 @@
 # ![Managur](managur_logo.png) Collections
 
-[![](https://travis-ci.org/managur/Collection.svg?branch=master)](https://travis-ci.org/managur/Collection/settings#)
+[![](https://travis-ci.org/managur/Collection.svg?branch=master)](https://travis-ci.org/managur/Collection)
 
 _Managur Collections_ is a library that provides a fully featured collection
 object to PHP.
