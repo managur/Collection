@@ -9,7 +9,7 @@ install:
 
 script:
 - vendor/bin/phpunit
-- vendor/bin/phpcs --standard=psr2 test/ -n
+- vendor/bin/phpcs --standard=psr2 src/ -n
 
 matrix:
   fast_finish: true

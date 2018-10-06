@@ -110,13 +110,25 @@ argument) to get the specific combination that you require.
 This library uses PHPUnit 7 to provide unit tests. To run the tests yourself,
 simply enter the following at a command line interface:
 ```sh
-$ vendor/bin/phpunit
+$ composer test
 ```
 Tests _should_ run automatically, assuming that you can call PHP directly from
 the command line (ie it is in your path).
 
 We also automate testing with Travis-CI. You can view the latest builds
 [here](https://travis-ci.org/managur/Collection).
+
+## Code Sniffer
+We enforce PSR-2 coding standards. To test the code, run this command:
+```sh
+$ composer cs
+```
+
+## Fix Code Standard Failures
+To automatically fix code standard failures, run this command:
+```sh
+$ composer fix-cs
+```
 
 ## Manual
 Full functionality provided with Managur Collection is documented here:
