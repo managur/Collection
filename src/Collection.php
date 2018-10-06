@@ -14,7 +14,8 @@ use TypeError;
  * @package Managur
  * @license MIT
  */
-class Collection extends ArrayObject implements JsonSerializable {
+class Collection extends ArrayObject implements JsonSerializable
+{
 
     const FILTER_USE_KEY = \ARRAY_FILTER_USE_KEY;
     const FILTER_USE_BOTH = \ARRAY_FILTER_USE_BOTH;
@@ -26,9 +27,9 @@ class Collection extends ArrayObject implements JsonSerializable {
     protected $valueType = null;
 
 
-    public function __construct($items=[])
+    public function __construct($items = [])
     {
-        foreach ($this->arrayItems($items) as $key=>$value) {
+        foreach ($this->arrayItems($items) as $key => $value) {
             $this->offsetSet($key, $value);
         }
     }
@@ -159,7 +160,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param mixed $carry Initial value, or returned if array is empty
      * @return mixed Type depends on return value of $callable
      */
-    public function reduce(callable $callable, $carry=null)
+    public function reduce(callable $callable, $carry = null)
     {
         $array = $this->getArrayCopy();
         return array_reduce($array, $callable, $carry);
@@ -172,7 +173,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param int|null $flag Collection::FILTER_USE_KEY or Collection::FILTER_USE_BOTH
      * @return self
      */
-    public function filter($callable=null, int $flag=null): self
+    public function filter($callable = null, int $flag = null): self
     {
         $array = $this->getArrayCopy();
         if ($callable && is_callable($callable)) {
@@ -188,10 +189,10 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param mixed|null If no result is found, return this instead
      * @return mixed
      */
-    public function first(callable $callable=null, $default=null)
+    public function first(callable $callable = null, $default = null)
     {
         if (!$callable) {
-            $callable = function($item) {
+            $callable = function ($item) {
                 return $item;
             };
         }
@@ -211,7 +212,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param mixed|null If no result is found, return this instead
      * @return mixed
      */
-    public function last(callable $callable=null, $default=null)
+    public function last(callable $callable = null, $default = null)
     {
         if (!$callable) {
             $array = array_filter($this->getArrayCopy());
@@ -284,7 +285,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param callable|null $callable
      * @return Collection
      */
-    public function sort(callable $callable=null): self
+    public function sort(callable $callable = null): self
     {
         $data = $this->getArrayCopy();
         if ($callable) {
@@ -309,7 +310,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param callable|null $callable
      * @return Collection
      */
-    public function asort(callable $callable=null): self
+    public function asort(callable $callable = null): self
     {
         $data = $this->getArrayCopy();
         if ($callable) {
@@ -340,7 +341,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param string $valueType
      * @return Collection
      */
-    private static function getTypedCollection($data, string $keyType=null, string $valueType=null): Collection
+    private static function getTypedCollection($data, string $keyType = null, string $valueType = null): Collection
     {
         $ret = new class ($data, $keyType, $valueType) extends Collection {
             public function __construct($data, $keyType, $valueType)
@@ -361,7 +362,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param array $data
      * @return Collection
      */
-    public static function newTypedValueCollection(string $valueType, $data=[]): Collection
+    public static function newTypedValueCollection(string $valueType, $data = []): Collection
     {
         return self::getTypedCollection($data, null, $valueType);
     }
@@ -373,7 +374,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param array $data
      * @return Collection
      */
-    public static function newTypedKeyCollection(string $keyType, $data=[]): Collection
+    public static function newTypedKeyCollection(string $keyType, $data = []): Collection
     {
         return self::getTypedCollection($data, $keyType);
     }
@@ -386,7 +387,7 @@ class Collection extends ArrayObject implements JsonSerializable {
      * @param array $data
      * @return Collection
      */
-    public static function newTypedCollection(?string $keyType, ?string $valueType, $data=[]): Collection
+    public static function newTypedCollection(?string $keyType, ?string $valueType, $data = []): Collection
     {
         return self::getTypedCollection($data, $keyType, $valueType);
     }
