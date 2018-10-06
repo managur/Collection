@@ -4,6 +4,8 @@ namespace Managur\Collection;
 use ArrayObject;
 use JsonSerializable;
 use TypeError;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Managur Generic Collection Class
@@ -122,7 +124,9 @@ class Collection extends ArrayObject implements JsonSerializable
         if (!class_exists($collection)) {
             throw new TypeError(sprintf('Unknown class name "%s"', $collection));
         }
-        if (!is_subclass_of($collection, Collection::class)) {
+        if (!is_subclass_of($collection, Collection::class) &&
+            Collection::class !== $collection
+        ) {
             throw new TypeError(sprintf('Class "%s" is not a Collection type', $collection));
         }
         return new $collection($this->getArrayCopy());
@@ -137,7 +141,7 @@ class Collection extends ArrayObject implements JsonSerializable
     public function map(callable $callable): self
     {
         $array = $this->getArrayCopy();
-        return new static(array_map($callable, $array, array_keys($array)));
+        return $this->getNewInstance(array_map($callable, $array, array_keys($array)));
     }
 
     /**
@@ -177,9 +181,9 @@ class Collection extends ArrayObject implements JsonSerializable
     {
         $array = $this->getArrayCopy();
         if ($callable && is_callable($callable)) {
-            return new static(...array_filter($array, $callable, $flag));
+            return $this->getNewInstance(array_filter($array, $callable, $flag));
         }
-        return new static(array_filter($array));
+        return $this->getNewInstance(array_filter($array));
     }
 
     /**
@@ -301,7 +305,7 @@ class Collection extends ArrayObject implements JsonSerializable
                 sort($data);
             }
         }
-        return new static($data);
+        return $this->getNewInstance($data);
     }
 
     /**
@@ -318,7 +322,7 @@ class Collection extends ArrayObject implements JsonSerializable
         } else {
             asort($data);
         }
-        return new static($data);
+        return $this->getNewInstance($data);
     }
 
     /**
@@ -328,7 +332,28 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public function shuffle(): self
     {
-        return new static(shuffle($this->getArrayCopy()));
+        $data = $this->getArrayCopy();
+        shuffle($data);
+        return $this->getNewInstance($data);
+    }
+
+    /**
+     * Get a New Instance of the Same Type
+     *
+     * @param $data
+     * @return Collection
+     */
+    private function getNewInstance($data): self
+    {
+        try {
+            $reflection = new ReflectionClass($this);
+        } catch (ReflectionException $e) {
+            throw new TypeError('Error reflecting collection', null, $e);
+        }
+        if ($reflection->isAnonymous()) {
+            return self::getTypedCollection($data, $this->keyType, $this->valueType);
+        }
+        return new static($data);
     }
 
     /**

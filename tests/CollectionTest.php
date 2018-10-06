@@ -9,6 +9,33 @@ final class CollectionTest extends TestCase
 {
     /**
      * @dataProvider collectibles
+     * @param $data
+     * @test
+     */
+    public function functions($data)
+    {
+        $collection = collect($data);
+        $this->assertInstanceOf(Collection::class, $collection);
+        $this->assertCount(count($data), $collection);
+
+        $collection = collectInto(Collection::class, $data);
+        $this->assertInstanceOf(Collection::class, $collection);
+        $this->assertCount(count($data), $collection);
+    }
+
+    /**
+     * @test
+     */
+    public function nonIterableTypeCollects()
+    {
+        $str = 'a string of text';
+        $collection = new Collection($str);
+        $this->assertInstanceOf(Collection::class, $collection);
+        $this->assertEquals($str, $collection[0]);
+    }
+
+    /**
+     * @dataProvider collectibles
      * @param mixed $data
      * @test
      */
@@ -336,6 +363,195 @@ final class CollectionTest extends TestCase
         $this->assertEquals(30, $merged->last());
     }
 
+    /**
+     * @dataProvider sorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function simpleSort($data, $sorted)
+    {
+        $collection = new Collection($data);
+        $collectionSorted = $collection->sort();
+        foreach ($sorted as $key => $val) {
+            $this->assertEquals($val, $collectionSorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider sorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function userSort($data, $sorted)
+    {
+        $collection = new Collection($data);
+        $collectionSorted = $collection->sort(function ($a, $b) {
+            return $a <=> $b;
+        });
+        foreach ($sorted as $key => $val) {
+            $this->assertEquals($val, $collectionSorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider sorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function simpleSortTypedCollection($data, $sorted)
+    {
+        $collection = Collection::newTypedValueCollection(gettype(current($data)), $data);
+        $collectionSorted = $collection->sort();
+        foreach ($sorted as $key => $val) {
+            $this->assertEquals($val, $collectionSorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider sorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function userSortTypedCollection($data, $sorted)
+    {
+        $collection = Collection::newTypedValueCollection(gettype(current($data)), $data);
+        $collectionSorted = $collection->sort(function ($a, $b) {
+            return $a <=> $b;
+        });
+        foreach ($sorted as $key => $val) {
+            $this->assertEquals($val, $collectionSorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider sorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function simpleSortTypedKeyCollection($data, $sorted)
+    {
+        $collection = Collection::newTypedKeyCollection('integer', $data);
+        $collectionSorted = $collection->sort();
+        $collectionArray = array_values($collectionSorted->getArrayCopy());
+        foreach ($collectionArray as $key=>$value) {
+            $this->assertEquals($value, $sorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider sorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function userSortTypedKeyCollection($data, $sorted)
+    {
+        $collection = Collection::newTypedKeyCollection('integer', $data);
+        $collectionSorted = $collection->sort(function ($a, $b) {
+            return $a <=> $b;
+        });
+        $collectionArray = array_values($collectionSorted->getArrayCopy());
+        foreach ($collectionArray as $key=>$value) {
+            $this->assertEquals($value, $sorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider asorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function simpleAsort($data, $sorted)
+    {
+        $collection = new Collection($data);
+        $collectionSorted = $collection->asort();
+        foreach ($collectionSorted as $key => $value) {
+            $this->assertEquals($value, $sorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider asorts
+     * @param $data
+     * @param $sorted
+     * @test
+     */
+    public function userAsort($data, $sorted)
+    {
+        $collection = new Collection($data);
+        $collectionSorted = $collection->asort(function ($a, $b) {
+            return $a <=> $b;
+        });
+        foreach ($collectionSorted as $key => $value) {
+            $this->assertEquals($value, $sorted[$key]);
+        }
+    }
+
+    /**
+     * @dataProvider sorts
+     * @param $data
+     * @test
+     */
+    public function shuffle($data)
+    {
+        $collection = new Collection($data);
+        $shuffled = $collection->shuffle();
+        $shuffledArray = $shuffled->getArrayCopy();
+        $this->assertNotEquals($shuffledArray, $data);
+    }
+
+    /**
+     * @test
+     */
+    public function collectInto()
+    {
+        $collection1 = new Collection([1,2,3,4,5]);
+        $collection2 = $collection1->into(Collection::class);
+        $this->assertEquals($collection1, $collection2);
+        $this->assertNotEquals(spl_object_hash($collection1), spl_object_hash($collection2));
+        $this->assertInstanceOf(Collection::class, $collection2);
+    }
+
+    /**
+     * @expectedException \TypeError
+     * @test
+     */
+    public function failToCollectIntoANonCollectionType()
+    {
+        $collection = new Collection([1,2,3,4,5]);
+        $collection->into(\DateTime::class);
+    }
+
+    /**
+     * @expectedException \TypeError
+     * @test
+     */
+    public function failToCollectIntoANonExitingType()
+    {
+        $collection = new Collection([1,2,3,4,5]);
+        $collection->into('my arbitrary type');
+    }
+
+    /**
+     * @dataProvider collectibles
+     * @param $data
+     * @test
+     */
+    public function collectionWillJsonSerialize($data)
+    {
+        $collection = new Collection($data);
+        $json = json_encode($collection);
+        $this->assertInternalType('string', $json);
+
+        $this->assertInternalType('array', $collection->jsonSerialize());
+    }
+
 
 
 
@@ -400,6 +616,22 @@ final class CollectionTest extends TestCase
             [[new \DateTime, new \StdClass], null, \DateTime::class],
             [['a'=>'b', 'c'=>'d'], 'integer', null],
             [['a'=>'b', 'c'=>'d'], null, 'integer'],
+        ];
+    }
+
+    public function sorts(): array
+    {
+        return [
+            [[10,1,4,2,5,9,8,6,3,7], [1,2,3,4,5,6,7,8,9,10]],
+            [['aa', 'ba', 'ab', 'b', 'a'], ['a','aa', 'ab', 'b', 'ba']],
+        ];
+    }
+
+    public function asorts(): array
+    {
+        return [
+            [['a'=>3, 'b'=>2, 'c'=>1], ['c'=>1, 'b'=>2, 'a'=>3]],
+            [['a'=>'c', 'b'=>'b', 'c'=>'a'], ['c'=>'a', 'b'=>'b', 'a'=>'c']],
         ];
     }
 }
