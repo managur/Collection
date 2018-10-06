@@ -1,4 +1,4 @@
-# ![Managur](managur_logo.png) Collections
+# ![Managur](managur_logo.png)<br>Collections
 
 [![](https://travis-ci.org/managur/Collection.svg?branch=master)](https://travis-ci.org/managur/Collection)
 
@@ -105,6 +105,18 @@ $integerCollection = Collection::newTypedCollection('integer', 'integer', [1,2,3
 If you wish, you can use the `newTypedCollection()` method for all purposes,
 passing in `null` for the key (first argument) and/or the value (second
 argument) to get the specific combination that you require.
+
+## Tests
+This library uses PHPUnit 7 to provide unit tests. To run the tests yourself,
+simply enter the following at a command line interface:
+```sh
+$ vendor/bin/phpunit
+```
+Tests _should_ run automatically, assuming that you can call PHP directly from
+the command line (ie it is in your path).
+
+We also automate testing with Travis-CI. You can view the latest builds
+[here](https://travis-ci.org/managur/Collection).
 
 ## Manual
 Full functionality provided with Managur Collection is documented here:
