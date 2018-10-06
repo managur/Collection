@@ -1,0 +1,38 @@
+{
+  "name": "managur/collection",
+  "description": "A base collection class to build your object collections on top of",
+  "type": "library",
+  "keywords": [
+    "collection"
+  ],
+  "homepage": "https://github.com/managur/Collection",
+  "require-dev": {
+    "phpunit/phpunit": "^7.0"
+  },
+  "require": {
+    "php": "^7.1"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Anthony Chambers",
+      "email": "anthony@managur.io",
+      "homepage": "http://anthonychambers.uk",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "anthony@managur.io"
+  },
+  "autoload": {
+    "psr-4": {
+      "Managur\\Collection\\": "src/"
+    },
+    "files": [
+      "src/functions.php"
+    ]
+  },
+  "replace": {
+    "antnee/collection": "*"
+  }
+}
