@@ -363,7 +363,6 @@ final class CollectionTest extends TestCase
             [['f','b','e','c','d','a'], 'integer', 'string'],
             [new Collection([4,3,5,1,2,6]), 'integer', null],
             [new class implements \JsonSerializable, \Countable { public function count(){ return count($this->jsonSerialize()); } public function jsonSerialize(){ return ['a','b','c','d','e','f']; }}],
-            ['string of text'],
         ];
     }
 
