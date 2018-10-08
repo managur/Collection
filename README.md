@@ -1,9 +1,10 @@
 # ![Managur](managur_logo.png)<br>Collections
 
 [![Build Status](https://travis-ci.org/managur/Collection.svg?branch=master)](https://travis-ci.org/managur/Collection)
+[![Latest Stable Version](https://poser.pugx.org/managur/collection/v/stable)](https://packagist.org/packages/managur/collection)
+[![License](https://poser.pugx.org/managur/collection/license)](https://packagist.org/packages/managur/collection)
 [![Coverage Status](https://coveralls.io/repos/github/managur/Collection/badge.svg)](https://coveralls.io/github/managur/Collection)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cf9fc22664d7eca42514/maintainability)](https://codeclimate.com/github/managur/Collection/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/cf9fc22664d7eca42514/test_coverage)](https://codeclimate.com/github/managur/Collection/test_coverage)
 
 _Managur Collections_ is a library that provides a fully featured collection
 object to PHP.
