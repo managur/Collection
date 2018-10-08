@@ -6,10 +6,15 @@ php:
 
 install:
 - travis_retry composer install --no-interaction --prefer-source
+- composer require --dev php-coveralls/php-coveralls
 
 script:
-- vendor/bin/phpunit
+- mkdir -p build/logs
+- vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 - vendor/bin/phpcs --standard=psr2 src/ -n
 
 matrix:
   fast_finish: true
+
+after_success:
+- travis_retry php vendor/bin/php-coveralls -v
