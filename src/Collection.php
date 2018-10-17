@@ -345,11 +345,7 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     private function getNewInstance($data): self
     {
-        try {
-            $reflection = new ReflectionClass($this);
-        } catch (ReflectionException $e) {
-            throw new TypeError('Error reflecting collection', null, $e);
-        }
+        $reflection = new ReflectionClass($this);
         if ($reflection->isAnonymous()) {
             return self::getTypedCollection($data, $this->keyType, $this->valueType);
         }
