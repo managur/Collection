@@ -5,7 +5,6 @@ use ArrayObject;
 use JsonSerializable;
 use TypeError;
 use ReflectionClass;
-use ReflectionException;
 
 /**
  * Managur Generic Collection Class
