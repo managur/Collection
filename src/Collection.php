@@ -116,7 +116,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Copy entries into a new collection
      *
      * @param string $collection The collection type to copy into
-     * @return Collection
+     * @return self
      * @throws TypeError
      */
     public function into(string $collection): Collection
@@ -136,7 +136,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Map Function Against Collection and Return New Collection
      *
      * @param callable $callable May take up to two arguments: First is the array value, the second is the array key
-     * @return self New collection of the same type
+     * @return static New collection of the same type
      */
     public function map(callable $callable): self
     {
@@ -175,7 +175,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param callable|null $callable Callback for each iteration. If null will just filter empty values from array
      * @param int|null $flag Collection::FILTER_USE_KEY or Collection::FILTER_USE_BOTH
-     * @return self
+     * @return static
      */
     public function filter($callable = null, int $flag = null): self
     {
@@ -270,7 +270,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Returns a new object which contains the original and new elements
      *
      * @param Collection $add
-     * @return self
+     * @return static
      */
     public function merge(Collection $add): self
     {
@@ -287,7 +287,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Functions the same as asort() if index types are constrained
      *
      * @param callable|null $callable
-     * @return Collection
+     * @return static
      */
     public function sort(callable $callable = null): self
     {
@@ -312,7 +312,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Get a New Collection With Contents Sorted, Maintaining Index Associations
      *
      * @param callable|null $callable
-     * @return Collection
+     * @return static
      */
     public function asort(callable $callable = null): self
     {
@@ -328,7 +328,7 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Collection With Contents Shuffled
      *
-     * @return Collection
+     * @return static
      */
     public function shuffle(): self
     {
@@ -341,7 +341,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Get a New Instance of the Same Type
      *
      * @param $data
-     * @return Collection
+     * @return static
      */
     private function getNewInstance($data): self
     {
@@ -364,7 +364,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed $data
      * @param string $keyType
      * @param string $valueType
-     * @return Collection
+     * @return self
      */
     private static function getTypedCollection($data, string $keyType = null, string $valueType = null): Collection
     {
@@ -385,7 +385,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param string $valueType The type that all values must match
      * @param array $data
-     * @return Collection
+     * @return self
      */
     public static function newTypedValueCollection(string $valueType, $data = []): Collection
     {
@@ -397,7 +397,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param string $keyType The type that all keys must match
      * @param array $data
-     * @return Collection
+     * @return self
      */
     public static function newTypedKeyCollection(string $keyType, $data = []): Collection
     {
@@ -410,7 +410,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param string $keyType The type that all keys must match
      * @param string $valueType The type that all values must match
      * @param array $data
-     * @return Collection
+     * @return self
      */
     public static function newTypedCollection(?string $keyType, ?string $valueType, $data = []): Collection
     {
