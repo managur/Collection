@@ -552,6 +552,28 @@ final class CollectionTest extends TestCase
         $this->assertInternalType('array', $collection->jsonSerialize());
     }
 
+    /**
+     * @test
+     */
+    public function checkForEmptyCollection()
+    {
+        $collection = new Collection();
+
+        $this->assertTrue($collection->isEmpty());
+        $this->assertFalse($collection->isNotEmpty());
+    }
+
+    /**
+     * @test
+     */
+    public function checkForNonEmptyCollection()
+    {
+        $collection = new Collection([1]);
+
+        $this->assertTrue($collection->isNotEmpty());
+        $this->assertFalse($collection->isEmpty());
+    }
+
 
 
 

@@ -426,4 +426,20 @@ class Collection extends ArrayObject implements JsonSerializable
     {
         return $this->getArrayCopy();
     }
+
+    /**
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return $this->count() === 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotEmpty(): bool
+    {
+        return $this->count() > 0;
+    }
 }
