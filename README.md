@@ -294,6 +294,20 @@ $containsAGmailUser = $collection->contains(function ($user) {
 If a user with a Gmail address is found in the collection then
 `$containsAGmailUser` will be `true`. 
 
+### Empty
+The methods `isEmpty()` and `isNotEmpty()` are available to check whether the
+collection contains items or not.
+
+```php
+$collection = new Collection([]);
+$collection->isEmpty(); // true
+```
+
+```php
+$collection = new Collection([1, 2, 3]);
+$collection->isNotEmpty(); // true
+```
+
 ### Push
 The `push()` method is similar to `append()`, in that it will only work if you
 have not defined a strict index type. The only way that it is different is that
