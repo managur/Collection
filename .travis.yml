@@ -1,5 +1,9 @@
 language: php
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=7e798e45a94f35d7d9f99f34b8de5d41694eff3f89681b03acd908191efe3e28
+
 php:
 - 7.1
 - 7.2
@@ -7,6 +11,11 @@ php:
 install:
 - travis_retry composer install --no-interaction --prefer-source
 - composer require --dev php-coveralls/php-coveralls
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 
 script:
 - mkdir -p build/logs
@@ -18,3 +27,6 @@ matrix:
 
 after_success:
 - travis_retry php vendor/bin/php-coveralls -v
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
