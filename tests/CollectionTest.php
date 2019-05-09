@@ -574,6 +574,85 @@ final class CollectionTest extends TestCase
         $this->assertFalse($collection->isEmpty());
     }
 
+    /** @test */
+    public function keyStrategyNotSetWorksOnConstruction(): void
+    {
+        $collection = new Collection([1]);
+
+        $this->assertSame($collection[0], 1);
+    }
+
+    /** @test */
+    public function keyStrategyNotSetWorksWithAppend(): void
+    {
+        $collection = new Collection();
+        $collection->append(1);
+
+        $this->assertSame($collection[0], 1);
+    }
+
+    /** @test */
+    public function keyStrategyNotSetWorksWithOffsetSet(): void
+    {
+        $collection = new Collection();
+        $collection[] = 1;
+
+        $this->assertSame($collection[0], 1);
+    }
+
+    /** @test */
+    public function keyStrategySetWorksOnConstruction(): void
+    {
+        $items = [
+            ['id' => 1234, 'name' => 'Erica'],
+            ['id' => 9999, 'name' => 'Bob'],
+        ];
+
+        $collection = new class($items) extends Collection {
+            protected function keyStrategy($value)
+            {
+                return $value['id'];
+            }
+        };
+
+        $this->assertSame($collection[1234], ['id' => 1234, 'name' => 'Erica']);
+        $this->assertSame($collection[9999], ['id' => 9999, 'name' => 'Bob']);
+    }
+
+    /** @test */
+    public function keyStrategySetWorksOnAppend(): void
+    {
+        $collection = new class() extends Collection {
+            protected function keyStrategy($value)
+            {
+                return $value['id'];
+            }
+        };
+
+        $collection->append(['id' => 1234, 'name' => 'Erica']);
+        $collection->append(['id' => 9999, 'name' => 'Bob']);
+
+        $this->assertSame($collection[1234], ['id' => 1234, 'name' => 'Erica']);
+        $this->assertSame($collection[9999], ['id' => 9999, 'name' => 'Bob']);
+    }
+
+    /** @test */
+    public function keyStrategySetWorksOnOffsetSet(): void
+    {
+        $collection = new class() extends Collection {
+            protected function keyStrategy($value)
+            {
+                return $value['id'];
+            }
+        };
+
+        $collection[] = ['id' => 1234, 'name' => 'Erica'];
+        $collection[] = ['id' => 9999, 'name' => 'Bob'];
+
+        $this->assertSame($collection[1234], ['id' => 1234, 'name' => 'Erica']);
+        $this->assertSame($collection[9999], ['id' => 9999, 'name' => 'Bob']);
+    }
+
 
 
 

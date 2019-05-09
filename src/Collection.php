@@ -55,16 +55,42 @@ class Collection extends ArrayObject implements JsonSerializable
     }
 
     /**
+     * Collection Key Strategy
+     *
+     * Override this method in your own class to have your collection keys automatically set to your preference. For
+     * example:
+     * ```php
+     * protected function keyStrategy($value)
+     * {
+     *     return $value->id();
+     * }
+     * ```
+     *
+     * @param $value
+     * @return mixed
+     */
+    protected function keyStrategy($value)
+    {
+        return null;
+    }
+
+    /**
      * Append Value
      *
-     * <strong>IMPORTANT:</strong> You cannot append if you are using typed keys. In that case you MUST specify an
-     * appropriate offset, either via offsetSet() or as $collection[$offset] = $value;
+     * <strong>IMPORTANT:</strong> You cannot append if you are using typed keys unless you also implement an
+     * appropriate keyStrategy method. If not, then you MUST specify an appropriate offset, either via offsetSet() or as
+     * $collection[$offset] = $value;
      *
      * @param mixed $value
      */
     public function append($value)
     {
-        parent::append($this->checkType($value, $this->valueType));
+        $key = $this->keyStrategy($value);
+        if ($key !== null) {
+            $this->offsetSet($key, $value);
+        } else {
+            parent::append($this->checkType($value, $this->valueType));
+        }
     }
 
     /**
@@ -73,6 +99,12 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public function offsetSet($index, $value)
     {
+        $newIndex = $this->keyStrategy($value);
+
+        if ($newIndex !== null) {
+            $index = $newIndex;
+        }
+
         parent::offsetSet(
             $this->checkType($index, $this->keyType),
             $this->checkType($value, $this->valueType)

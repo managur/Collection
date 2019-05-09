@@ -94,6 +94,39 @@ collection type.
 You can combine the key and value restrictions to force a very specifically
 typed collection if you require.
 
+### Key Strategies
+When you `append()` or `offsetSet()` a value to the collection, we call the
+protected `keyStrategy()` method, passing it the item that you want to collect.
+By default we return `null`, which tells `append()` and `offsetSet()` that you
+wish for the collection to use PHP’s default zero-indexed, auto-incrementing
+key IDs.
+
+If this is not the case, whether because you simply wish to organise by your
+own keys, or because you’ve restricted the key type to a `string`, for example,
+you can override the `keyStrategy()` method in your child collection class to
+automatically set the key to a value of your choosing.
+
+For example, in our hypothetical `UserCollection` class, we add this
+implementation of `keyStrategy()`:
+
+```php
+protected function keyStrategy($value)
+{
+    return $value->id();
+}
+```
+
+And once the key strategy is set, appending or setting items in the collection
+will have the key set appropriately.
+
+```php
+$user = new User('my-user-id', 'Managur User');
+$collection = new UserCollection();
+$collection[] = $user;
+
+var_dump($collection['my-user-id'] === $user); // returns true
+```
+
 ### Using Static Factory Methods to Dynamically Fix Typed Collections
 We provide three methods that will generate an anonymous class with the same
 functionality as the main collection, but with enforced types for keys and/or
