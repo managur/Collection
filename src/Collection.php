@@ -146,21 +146,45 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Copy entries into a new collection
      *
-     * @param string $collection The collection type to copy into
+     * @param string $type The collection type to copy into
      * @return self
      * @throws TypeError
      */
-    public function into(string $collection): Collection
+    public function into(string $type): Collection
     {
-        if (!class_exists($collection)) {
-            throw new TypeError(sprintf('Unknown class name "%s"', $collection));
+        return self::newCollectionOfType($type, $this->getArrayCopy());
+    }
+
+    /**
+     * Map collection into a new collection of a given type
+     *
+     * @param callable $callable
+     * @param string $type
+     * @return Collection
+     */
+    public function mapInto(callable $callable, string $type): self
+    {
+        return self::newCollectionOfType($type, array_map($callable, $this->getArrayCopy()));
+    }
+
+    /**
+     * Get a new collection of a given type
+     *
+     * @param string $type The collection type that you want an instance of
+     * @param array $items The items that you want to collect immediately (defaults to nothing)
+     * @return self
+     */
+    public static function newCollectionOfType(string $type, $items = []): Collection
+    {
+        if (!class_exists($type)) {
+            throw new TypeError(sprintf('Unknown class name "%s"', $type));
         }
-        if (!is_subclass_of($collection, Collection::class) &&
-            Collection::class !== $collection
+        if (!is_subclass_of($type, Collection::class) &&
+            Collection::class !== $type
         ) {
-            throw new TypeError(sprintf('Class "%s" is not a Collection type', $collection));
+            throw new TypeError(sprintf('Class "%s" is not a Collection type', $type));
         }
-        return new $collection($this->getArrayCopy());
+        return new $type($items);
     }
 
     /**
