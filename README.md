@@ -219,6 +219,22 @@ $doubles = $collection->map(function ($value) {
 });
 ```
 
+### Map Into
+The `mapInto()` method allows you to take any collection and in one call create
+a new collection of a given type, run a callable across the data, and have it
+immediately collected into the new collection.
+
+Here's an example where we have created new collections that are restricted to
+allowing only integers to be collected in the first, and strings in the second:
+```php
+$ints = new IntegerCollection([1, 2, 3, 4, 5]);
+$strings = $ints->mapInto(function (int $item): string {
+    return (string)($item*10);
+}, StringCollection::class);
+```
+We now have a `StringCollection` which contains a string representation of
+every value from the original `$ints` collection, multiplied by 10.
+
 ### Each
 Sometimes we need to iterate over values, but we don't want to make any
 changes. That is where `each()` is different to `map()`. Otherwise, the

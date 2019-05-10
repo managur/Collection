@@ -539,6 +539,46 @@ final class CollectionTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function mapInto()
+    {
+        $stringCollection = new class extends Collection
+        {
+            protected $valueType = 'string';
+        };
+
+        $intCollection = new class([1,2,3,4,5]) extends Collection
+        {
+            protected $valueType = 'integer';
+        };
+
+        $finalCollection = $intCollection->mapInto(function (int $int): string {
+            return (string) ($int * 10);
+        }, get_class($stringCollection));
+
+        $finalCollection->each(function ($value, $key) use ($intCollection) {
+            $this->assertSame((string) ($intCollection[$key] * 10), $value);
+        });
+    }
+
+    /**
+     * @test
+     * @expectedException \TypeError
+     */
+    public function mapIntoThrows()
+    {
+        $intCollection = new class([1,2,3,4,5]) extends Collection
+        {
+            protected $valueType = 'integer';
+        };
+
+        $intCollection->mapInto(function (int $int): string {
+            return (string) ($int * 10);
+        }, get_class($intCollection));
+    }
+
+    /**
      * @dataProvider collectibles
      * @param $data
      * @test
