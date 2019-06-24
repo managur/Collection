@@ -579,6 +579,16 @@ final class CollectionTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function slice(): void
+    {
+        $collection = new Collection(['a' => 1, 'b' => 2, 'c' => 3]);
+
+        $this->assertSame(['a' => 1, 'b' => 2], $collection->slice(0, 2)->getArrayCopy());
+    }
+
+    /**
      * @dataProvider collectibles
      * @param $data
      * @test

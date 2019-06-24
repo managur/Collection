@@ -235,6 +235,20 @@ $strings = $ints->mapInto(function (int $item): string {
 We now have a `StringCollection` which contains a string representation of
 every value from the original `$ints` collection, multiplied by 10.
 
+### Slice
+`slice()` provides a method to return the sequence of elements from the array
+
+This works on the position in the array, *not* the key.
+
+Here's a simple example slicing the first 2 elements from the array:
+```php
+$collection = new Collection(['a' => 1, 'b' => 2, 'c' => 3]);
+$doubles = $collection->slice(0, 2); // ['a' => 1, 'b' => 2]
+```
+
+The [PHP documentation](https://www.php.net/manual/en/function.array-slice.php)
+has a full description of the way `$offset` and `$limit` behave.
+
 ### Each
 Sometimes we need to iterate over values, but we don't want to make any
 changes. That is where `each()` is different to `map()`. Otherwise, the
