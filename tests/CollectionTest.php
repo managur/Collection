@@ -522,6 +522,19 @@ final class CollectionTest extends TestCase
         $this->assertEquals($shuffledArray, $expected);
     }
 
+
+    /**
+     * @dataProvider shuffles
+     * @param $data array
+     * @test
+     * @expectedException \LogicException
+     */
+    public function shuffleWithInvalidSeed($data)
+    {
+        $collection = new Collection($data);
+        $collection->shuffle(0);
+    }
+
     /**
      * @test
      */
