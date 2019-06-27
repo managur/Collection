@@ -455,13 +455,9 @@ return a new instance of the collection with the shuffled data:
 $collection = new Collection([1,2,3,4,5]);
 $shuffled = $collection->shuffle();
 ```
-`shuffle()` also takes an optional _seed_, which will be used to determine the
-start state of the pseudo random number generator (`mt_rand()`) that is used to
-determine the order that elements are shuffled into. The seed _should_ be an
-integer value, but you can pass in a string. However, if you use a string,
-please be aware that we will hash this value with `md5()`, take only the
-leading 8 bytes from the resulting hexadecimal value, and convert that into an
-integer, and use that value to seed the PRNG.
+`shuffle()` also takes an optional integer _seed_, which will be used to
+determine the start state of the pseudo random number generator (`mt_rand()`)
+that is used to determine the order that elements are shuffled into.
 
 If you use the _seed_ with `shuffle()`, the resulting collection will always
 have its elements in the same order for a given original collection and seed

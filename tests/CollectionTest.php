@@ -522,19 +522,6 @@ final class CollectionTest extends TestCase
         $this->assertEquals($shuffledArray, $expected);
     }
 
-
-    /**
-     * @dataProvider shuffles
-     * @param $data array
-     * @test
-     * @expectedException \LogicException
-     */
-    public function shuffleWithInvalidSeed($data)
-    {
-        $collection = new Collection($data);
-        $collection->shuffle(0);
-    }
-
     /**
      * @test
      */
@@ -803,7 +790,7 @@ final class CollectionTest extends TestCase
     {
         return [
             [[1,2,3,4,5,6,7,8,9,10], 15, [9,10,2,1,7,6,8,5,4,3]],
-            [[1,2,3,4,5,6,7,8,9,10], 'test seed', [4,3,6,2,5,1,10,7,8,9]],
+            [[1,2,3,4,5,6,7,8,9,10], PHP_INT_MAX, [7,10,8,3,6,1,9,5,4,2]],
         ];
     }
 

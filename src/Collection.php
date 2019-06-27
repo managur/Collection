@@ -402,18 +402,12 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Collection With Contents Shuffled
      *
-     * @param $seed int|string|null
+     * @param $seed int|null
      * @return static
      */
-    public function shuffle($seed = null): self
+    public function shuffle(int $seed = null): self
     {
         if ($seed !== null) {
-            if (is_string($seed)) {
-                $seed = (int) hexdec(substr(md5($seed), 0, 8));
-            }
-            if (!is_int($seed) || $seed <= 0) {
-                throw new \LogicException('Seed provided to shuffle() is invalid');
-            }
             mt_srand($seed);
         }
         $data = $this->getArrayCopy();
