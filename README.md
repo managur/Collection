@@ -164,7 +164,7 @@ $ composer cs
 ## Fix Code Standard Failures
 To automatically fix code standard failures, run this command:
 ```sh
-$ composer fix-cs
+$ composer cs-fix
 ```
 
 ## Manual
@@ -455,3 +455,10 @@ return a new instance of the collection with the shuffled data:
 $collection = new Collection([1,2,3,4,5]);
 $shuffled = $collection->shuffle();
 ```
+`shuffle()` also takes an optional integer _seed_, which will be used to
+determine the start state of the pseudo random number generator (`mt_rand()`)
+that is used to determine the order that elements are shuffled into.
+
+If you use the _seed_ with `shuffle()`, the resulting collection will always
+have its elements in the same order for a given original collection and seed
+value. It will never return a different order for this combination.

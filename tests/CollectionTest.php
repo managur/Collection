@@ -507,6 +507,22 @@ final class CollectionTest extends TestCase
     }
 
     /**
+     * @dataProvider shuffles
+     * @param $data array
+     * @param $seed string|int
+     * @param $expected array
+     * @test
+     */
+    public function shuffleWithSeed($data, $seed, $expected)
+    {
+        $collection = new Collection($data);
+        $shuffled = $collection->shuffle($seed);
+        $shuffledArray = $shuffled->getArrayCopy();
+        $this->assertNotEquals($shuffledArray, $data);
+        $this->assertEquals($shuffledArray, $expected);
+    }
+
+    /**
      * @test
      */
     public function collectInto()
@@ -767,6 +783,14 @@ final class CollectionTest extends TestCase
             [[new \DateTime, new \StdClass], null, \DateTime::class],
             [['a'=>'b', 'c'=>'d'], 'integer', null],
             [['a'=>'b', 'c'=>'d'], null, 'integer'],
+        ];
+    }
+
+    public function shuffles(): array
+    {
+        return [
+            [[1,2,3,4,5,6,7,8,9,10], 15, [9,10,2,1,7,6,8,5,4,3]],
+            [[1,2,3,4,5,6,7,8,9,10], PHP_INT_MAX, [7,10,8,3,6,1,9,5,4,2]],
         ];
     }
 

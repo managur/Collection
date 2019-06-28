@@ -402,10 +402,14 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Collection With Contents Shuffled
      *
+     * @param $seed int|null
      * @return static
      */
-    public function shuffle(): self
+    public function shuffle(int $seed = null): self
     {
+        if ($seed !== null) {
+            mt_srand($seed);
+        }
         $data = $this->getArrayCopy();
         shuffle($data);
         return $this->getNewInstance($data);
