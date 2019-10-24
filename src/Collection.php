@@ -126,14 +126,15 @@ class Collection extends ArrayObject implements JsonSerializable
     {
         if ($expectedType) {
             $valueType = \gettype($value);
-            if ($valueType === 'object' && !$value instanceof $expectedType) {
-                throw new TypeError(sprintf(
-                    "Invalid object type. Should be %s: %s collected",
-                    $expectedType,
-                    get_class($value)
-                ));
-            }
-            if ($valueType !== 'object' && $valueType !== $expectedType) {
+            if ($valueType === 'object') {
+                if (!$value instanceof $expectedType) {
+                    throw new TypeError(sprintf(
+                        "Invalid object type. Should be %s: %s collected",
+                        $expectedType,
+                        get_class($value)
+                    ));
+                }
+            } elseif ($valueType !== $expectedType) {
                 throw new TypeError(sprintf(
                     "Invalid type. Should be %s: %s collected",
                     $expectedType,
