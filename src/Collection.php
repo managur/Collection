@@ -125,7 +125,7 @@ class Collection extends ArrayObject implements JsonSerializable
     private function checkType($value, ?string $expectedType)
     {
         if ($expectedType) {
-            $valueType = gettype($value);
+            $valueType = \gettype($value);
             if ($valueType === 'object' && !$value instanceof $expectedType) {
                 throw new TypeError(sprintf(
                     "Invalid object type. Should be %s: %s collected",
