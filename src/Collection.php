@@ -118,25 +118,26 @@ class Collection extends ArrayObject implements JsonSerializable
      * value if it is.
      *
      * @param mixed $value
-     * @param string|null $type
+     * @param string|null $expectedType
      * @return mixed
      * @throws TypeError
      */
-    private function checkType($value, ?string $type)
+    private function checkType($value, ?string $expectedType)
     {
-        if ($type) {
-            if (is_object($value) && !$value instanceof $type) {
+        if ($expectedType) {
+            $valueType = gettype($value);
+            if ($valueType === 'object' && !$value instanceof $expectedType) {
                 throw new TypeError(sprintf(
                     "Invalid object type. Should be %s: %s collected",
-                    $type,
+                    $expectedType,
                     get_class($value)
                 ));
             }
-            if (!is_object($value) && gettype($value) !== $type) {
+            if ($valueType !== 'object' && $valueType !== $expectedType) {
                 throw new TypeError(sprintf(
                     "Invalid type. Should be %s: %s collected",
-                    $type,
-                    gettype($value)
+                    $expectedType,
+                    $valueType
                 ));
             }
         }
