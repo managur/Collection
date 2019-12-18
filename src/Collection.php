@@ -422,7 +422,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param string $glue
      * @param callable $callable
-     * @return static
+     * @return string
      */
     public function implode($glue = '', callable $callable = null): string
     {
