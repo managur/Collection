@@ -424,10 +424,13 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param callable $callable
      * @return static
      */
-    public function implode($glue = "", callable $callable = null): string
+    public function implode($glue = '', callable $callable = null): string
     {
-        $data = $callable ? $this->map($callable)->getArrayCopy() : $this->getArrayCopy();
-        return implode($glue, $data);
+        $array = $this->getArrayCopy();
+        if ($callable && is_callable($callable)) {
+            $array = array_map($callable, $array, array_keys($array));
+        }
+        return implode($glue, $array);
     }
 
     /**
