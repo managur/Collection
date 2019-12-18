@@ -462,3 +462,10 @@ that is used to determine the order that elements are shuffled into.
 If you use the _seed_ with `shuffle()`, the resulting collection will always
 have its elements in the same order for a given original collection and seed
 value. It will never return a different order for this combination.
+
+### Implode
+The `implode()` method will take your collection and return a string with the items joined together with `$glue`
+```php
+$collection = new Collection(['a', 'b']);
+$joined = $collection->implode(', '); // 'a, b'
+```
