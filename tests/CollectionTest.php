@@ -719,6 +719,13 @@ final class CollectionTest extends TestCase
         $this->assertSame($collection[9999], ['id' => 9999, 'name' => 'Bob']);
     }
 
+    /** @test */
+    public function itImplodesStrings(): void
+    {
+        $collection = new Collection(['a', 'b']);
+        $this->assertSame('a, b', $collection->implode(', '));
+    }
+
 
 
 
