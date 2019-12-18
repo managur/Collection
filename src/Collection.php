@@ -421,11 +421,13 @@ class Collection extends ArrayObject implements JsonSerializable
      * Join collection elements together with a string
      *
      * @param string $glue
+     * @param callable $callable
      * @return static
      */
-    public function implode($glue = ""): string
+    public function implode($glue = "", callable $callable = null): string
     {
-        return implode($glue, $this->getArrayCopy());
+        $data = $callable ? $this->map($callable)->getArrayCopy() : $this->getArrayCopy();
+        return implode($glue, $data);
     }
 
     /**

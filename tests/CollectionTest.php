@@ -726,6 +726,33 @@ final class CollectionTest extends TestCase
         $this->assertSame('a, b', $collection->implode(', '));
     }
 
+    /** @test */
+    public function itImplodesObjects(): void
+    {
+        $newClass = function(string $foo) {
+            return new class($foo) {
+                private $foo;
+                public function __construct(string $foo) {
+                    $this->foo = $foo;
+                }
+                public function foo(): string {
+                    return $this->foo;
+                }
+            };
+        };
+        $collection = new Collection([
+            $newClass('foo'),
+            $newClass('bar'),
+            $newClass('baz')
+        ]);
+        $this->assertSame(
+            'foo, bar, baz',
+            $collection->implode(', ', function ($item) {
+                return $item->foo();
+            })
+        );
+    }
+
 
 
 
