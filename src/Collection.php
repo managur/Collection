@@ -427,7 +427,7 @@ class Collection extends ArrayObject implements JsonSerializable
     public function implode($glue = '', callable $callable = null): string
     {
         $array = $this->getArrayCopy();
-        if ($callable && is_callable($callable)) {
+        if ($callable) {
             $array = array_map($callable, $array, array_keys($array));
         }
         return implode($glue, $array);
