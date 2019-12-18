@@ -464,8 +464,18 @@ have its elements in the same order for a given original collection and seed
 value. It will never return a different order for this combination.
 
 ### Implode
-The `implode()` method will take your collection and return a string with the items joined together with `$glue`
+The `implode()` method will take your collection and return a string with the
+items joined together with `$glue`
 ```php
 $collection = new Collection(['a', 'b']);
 $joined = $collection->implode(', '); // 'a, b'
+```
+
+You may also pass an optional callable as the second argument which allows you
+to pick the specific properties from your collected objects when imploding:
+```php
+$collection = new Collection($users);
+$joined = $collection->implode(', ', function (User $user): string {
+    return $user->name();
+});
 ```
