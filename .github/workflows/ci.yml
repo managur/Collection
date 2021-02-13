@@ -38,8 +38,8 @@ jobs:
         run: vendor/bin/phpcs --standard=psr2 src/ -n
       - name: Coveralls
         uses: coverallsapp/github-action@master
-          with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: CodeClimate
         uses: paambaati/codeclimate-action@v2.7.5
         env:
