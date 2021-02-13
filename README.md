@@ -1,6 +1,5 @@
 # ![Managur](managur_logo.png)<br>Collections
-
-[![Build Status](https://travis-ci.org/managur/Collection.svg?branch=master)](https://travis-ci.org/managur/Collection)
+[![CI](https://github.com/managur/Collection/workflows/CI/badge.svg)](https://github.com/managur/Collection/actions?query=workflow%3ACI)
 [![Latest Stable Version](https://poser.pugx.org/managur/collection/v/stable)](https://packagist.org/packages/managur/collection)
 [![License](https://poser.pugx.org/managur/collection/license)](https://packagist.org/packages/managur/collection)
 [![Coverage Status](https://coveralls.io/repos/github/managur/Collection/badge.svg)](https://coveralls.io/github/managur/Collection)
@@ -152,8 +151,8 @@ $ composer test
 Tests _should_ run automatically, assuming that you can call PHP directly from
 the command line (ie it is in your path).
 
-We also automate testing with Travis-CI. You can view the latest builds
-[here](https://travis-ci.org/managur/Collection).
+We also automate testing with Github Actions. You can view the latest builds
+[here](https://github.com/managur/Collection/actions?query=workflow%3ACI).
 
 ## Code Sniffer
 We enforce PSR-2 coding standards. To test the code, run this command:
