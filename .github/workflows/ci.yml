@@ -19,13 +19,6 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: intl #optional
           ini-values: "post_max_size=256M" #optional
-      - name: Cache vendor directory
-        uses: actions/cache@preview
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
       - name: Prepare FS
         run: mkdir -p build/logs
       - name: Validate composer.json and composer.lock
@@ -36,10 +29,33 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
       - name: PHPCS
         run: vendor/bin/phpcs --standard=psr2 src/ -n
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
+  Coverage:
+    name: Coverage Reports
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          php-version: 7.4
+          extensions: intl #optional
+          ini-values: "post_max_size=256M" #optional
+      - name: Prepare FS
+        run: mkdir -p build/logs
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+      - name: PHPUnit
+        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+      - name: Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            composer global require php-coveralls/php-coveralls
+            php-coveralls --coverage_clover=build/logs/clover.xml -v
       - name: CodeClimate
         uses: paambaati/codeclimate-action@v2.7.5
         env:
