@@ -6,6 +6,8 @@ use JsonSerializable;
 use TypeError;
 use ReflectionClass;
 
+use const SORT_REGULAR;
+
 /**
  * Managur Generic Collection Class
  *
@@ -195,7 +197,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param callable $callable May take up to two arguments: First is the array value, the second is the array key
      * @return static New collection of the same type
      */
-    public function map(callable $callable): self
+    public function map(callable $callable): static
     {
         $array = $this->getArrayCopy();
         return $this->getNewInstance(array_map($callable, $array, array_keys($array)));
@@ -215,7 +217,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *                      If it is omitted, then the sequence will have everything from offset up until the end of the array.
      * @return static New collection of the same type
      */
-    public function slice(int $offset, int $length = null): self
+    public function slice(int $offset, int $length = null): static
     {
         return $this->getNewInstance(array_slice($this->getArrayCopy(), $offset, $length));
     }
@@ -253,7 +255,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param int|null $flag Collection::FILTER_USE_KEY or Collection::FILTER_USE_BOTH
      * @return static
      */
-    public function filter($callable = null, int $flag = null): self
+    public function filter($callable = null, int $flag = null): static
     {
         $array = $this->getArrayCopy();
         if ($callable && is_callable($callable)) {
@@ -348,7 +350,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param Collection $add
      * @return static
      */
-    public function merge(Collection $add): self
+    public function merge(Collection $add): static
     {
         $clone = clone($this);
         foreach ($add as $newElement) {
@@ -362,25 +364,49 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * Functions the same as asort() if index types are constrained
      *
-     * @param callable|null $callable
+     * @param int $flags
      * @return static
      */
-    public function sort(callable $callable = null): self
+    public function sort(int $flags = SORT_REGULAR): static
     {
         $data = $this->getArrayCopy();
-        if ($callable) {
-            if ($this->keyType) {
-                uasort($data, $callable);
-            } else {
-                usort($data, $callable);
-            }
+        if ($this->keyType) {
+            asort($data, $flags);
         } else {
-            if ($this->keyType) {
-                asort($data);
-            } else {
-                sort($data);
-            }
+            sort($data);
         }
+        return $this->getNewInstance($data);
+    }
+
+    /**
+     *Get a New Collection With Contents Sorted By User Defined Callable
+     *
+     * Functions the same as uasort() if index types are constrained
+     *
+     * @param $callable
+     * @return static
+     */
+    public function usort(callable $callable): static
+    {
+        $data = $this->getArrayCopy();
+        if ($this->keyType) {
+            uasort($data, $callable);
+        } else {
+            usort($data, $callable);
+        }
+        return $this->getNewInstance($data);
+    }
+
+    /**
+     * Get a New Collection With Contents Sorted, Maintaining Index Associations
+     *
+     * @param int $flags
+     * @return static
+     */
+    public function asort(int $flags = SORT_REGULAR): static
+    {
+        $data = $this->getArrayCopy();
+        asort($data, $flags);
         return $this->getNewInstance($data);
     }
 
@@ -390,14 +416,10 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param callable|null $callable
      * @return static
      */
-    public function asort(callable $callable = null): self
+    public function uasort(callable $callable): static
     {
         $data = $this->getArrayCopy();
-        if ($callable) {
-            uasort($data, $callable);
-        } else {
-            asort($data);
-        }
+        uasort($data, $callable);
         return $this->getNewInstance($data);
     }
 
@@ -407,7 +429,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param $seed int|null
      * @return static
      */
-    public function shuffle(int $seed = null): self
+    public function shuffle(int $seed = null): static
     {
         if ($seed !== null) {
             mt_srand($seed);
@@ -439,7 +461,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param $data
      * @return static
      */
-    private function getNewInstance($data): self
+    private function getNewInstance($data): static
     {
         $reflection = new ReflectionClass($this);
         if ($reflection->isAnonymous()) {
