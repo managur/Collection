@@ -29,7 +29,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
       - name: PHPCS
         run: vendor/bin/phpcs --standard=psr2 src/ -n
-  Coverage:
+  coverage:
     name: Coverage Reports
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -53,9 +53,9 @@ jobs:
       - name: Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            composer global require php-coveralls/php-coveralls
-            php-coveralls --coverage_clover=build/logs/clover.xml -v
+        run: |
+          composer global require php-coveralls/php-coveralls
+          php-coveralls --coverage_clover=build/logs/clover.xml -v
       - name: CodeClimate
         uses: paambaati/codeclimate-action@v2.7.5
         env:
