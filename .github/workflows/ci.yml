@@ -1,0 +1,49 @@
+name: CI
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest, macOS-latest]
+        php-versions: [ '7.1', '7.2', '7.3', '7.4' ]
+    name: PHP ${{ matrix.php-versions }} ${{ matrix.operating-system }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: intl #optional
+          ini-values: "post_max_size=256M" #optional
+      - name: Cache vendor directory
+        uses: actions/cache@preview
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Prepare FS
+        run: mkdir -p build/logs
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+      - name: PHPUnit
+        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+      - name: PHPCS
+        run: vendor/bin/phpcs --standard=psr2 src/ -n
+      - name: Coveralls
+        run: |
+          composer require --dev php-coveralls/php-coveralls
+          php vendor/bin/php-coveralls -v
+      - name: CodeClimate
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+        with:
+          coverageLocations: |
+            ${{github.workspace}}/build/logs/clover.xml:clover
