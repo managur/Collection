@@ -37,9 +37,9 @@ jobs:
       - name: PHPCS
         run: vendor/bin/phpcs --standard=psr2 src/ -n
       - name: Coveralls
-        run: |
-          composer require --dev php-coveralls/php-coveralls
-          php vendor/bin/php-coveralls -v
+        uses: coverallsapp/github-action@master
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: CodeClimate
         uses: paambaati/codeclimate-action@v2.7.5
         env:
