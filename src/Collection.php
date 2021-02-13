@@ -1,4 +1,5 @@
 <?php
+
 namespace Managur\Collection;
 
 use ArrayObject;
@@ -183,7 +184,8 @@ class Collection extends ArrayObject implements JsonSerializable
         if (!class_exists($type)) {
             throw new TypeError(sprintf('Unknown class name "%s"', $type));
         }
-        if (!is_subclass_of($type, Collection::class) &&
+        if (
+            !is_subclass_of($type, Collection::class) &&
             Collection::class !== $type
         ) {
             throw new TypeError(sprintf('Class "%s" is not a Collection type', $type));
