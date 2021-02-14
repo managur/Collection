@@ -12,7 +12,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function functions($data)
+    public function functions($data): void
     {
         $collection = collect($data);
         $this->assertInstanceOf(Collection::class, $collection);
@@ -26,7 +26,7 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function nonIterableTypeCollects()
+    public function nonIterableTypeCollects(): void
     {
         $str = 'a string of text';
         $collection = new Collection($str);
@@ -39,7 +39,7 @@ final class CollectionTest extends TestCase
      * @param mixed $data
      * @test
      */
-    public function basicTypeAndCount($data)
+    public function basicTypeAndCount($data): void
     {
         $collection = new Collection($data);
         $this->assertInstanceOf(Collection::class, $collection);
@@ -52,7 +52,7 @@ final class CollectionTest extends TestCase
      * @param mixed $data
      * @test
      */
-    public function appendByMethod($data)
+    public function appendByMethod($data): void
     {
         $collection = new Collection($data);
         $collection->append('test');
@@ -64,7 +64,7 @@ final class CollectionTest extends TestCase
      * @param mixed $data
      * @test
      */
-    public function appendLikeArray($data)
+    public function appendLikeArray($data): void
     {
         $collection = new Collection($data);
         $collection[] = 'test';
@@ -76,7 +76,7 @@ final class CollectionTest extends TestCase
      * @param mixed $data
      * @test
      */
-    public function offsetSetByMethod($data)
+    public function offsetSetByMethod($data): void
     {
         $collection = new Collection;
         foreach ($data as $key=>$val) {
@@ -91,7 +91,7 @@ final class CollectionTest extends TestCase
      * @param mixed $data
      * @test
      */
-    public function offsetSetLikeArray($data)
+    public function offsetSetLikeArray($data): void
     {
         $collection = new Collection;
         foreach ($data as $key=>$val) {
@@ -108,7 +108,7 @@ final class CollectionTest extends TestCase
      * @param null $valueType
      * @test
      */
-    public function typedCollections($data, $keyType=null, $valueType=null)
+    public function typedCollections($data, $keyType=null, $valueType=null): void
     {
         $collection = $this->getTypedCollection($data, $keyType, $valueType);
         foreach ($data as $key=>$val) {
@@ -119,14 +119,14 @@ final class CollectionTest extends TestCase
 
     /**
      * @dataProvider mismatchedTypedCollections
-     * @expectedException \TypeError
      * @param $data
      * @param $keyType
      * @param $valueType
      * @test
      */
-    public function typedCollectionsWithIncorrectTypes($data, $keyType, $valueType)
+    public function typedCollectionsWithIncorrectTypes($data, $keyType, $valueType): void
     {
+        $this->expectException(\TypeError::class);
         $this->getTypedCollection($data,$keyType, $valueType);
     }
 
@@ -135,7 +135,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function checkMapOfCollectionData($data)
+    public function checkMapOfCollectionData($data): void
     {
         $collection = new Collection($data);
         $collection->map(function ($value, $key) use ($data) {
@@ -153,7 +153,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function checkEachEntryInTheCollection($data)
+    public function checkEachEntryInTheCollection($data): void
     {
         $collection = new Collection($data);
         $collection->each(function ($value, $key) use ($data) {
@@ -166,7 +166,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function reduceTheCollectionToAString($data)
+    public function reduceTheCollectionToAString($data): void
     {
         $collection = new Collection($data);
         $reduced = $collection->reduce(function($carry, $value) {
@@ -186,7 +186,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function filterTheCollection($data)
+    public function filterTheCollection($data): void
     {
         $collection = new Collection($data);
         $filtered = $collection->filter();
@@ -204,12 +204,10 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function filterTheCollectionWithACallable($data)
+    public function filterTheCollectionWithACallable($data): void
     {
         $collection = new Collection($data);
-        $filtered = $collection->filter(function ($value) {
-            return !empty($value);
-        });
+        $filtered = $collection->filter(fn ($value) => !empty($value));
         if (0 === count($filtered)) {
             // Empty values were all removed
             $this->assertTrue(true);
@@ -222,12 +220,10 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function filterOutOddNumbers()
+    public function filterOutOddNumbers(): void
     {
         $collection = new Collection(range(1, 200));
-        $filtered = $collection->filter(function ($value) {
-            return $value % 2 === 0;
-        });
+        $filtered = $collection->filter(fn ($value) => $value % 2 === 0);
         foreach ($filtered as $even) {
             $this->assertTrue(is_int($even / 2));
         }
@@ -238,7 +234,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function getFirstValue($data)
+    public function getFirstValue($data): void
     {
         $collection = new Collection($data);
         $first = $collection->first();
@@ -249,18 +245,15 @@ final class CollectionTest extends TestCase
             }
         }
         $this->assertEquals($expected, $first);
-
     }
 
     /**
      * @test
      */
-    public function getFirstValueByCallback()
+    public function getFirstValueByCallback(): void
     {
         $collection = new Collection([1,2,3,4,5,6,7,8,9]);
-        $first = $collection->first(function ($value) {
-            return $value >= 4;
-        });
+        $first = $collection->first(fn ($value) => $value >= 4);
         $this->assertEquals($first, 4);
     }
 
@@ -269,7 +262,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function getLastValue($data)
+    public function getLastValue($data): void
     {
         $collection = new Collection($data);
         $last = $collection->last();
@@ -285,12 +278,10 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function getLastValueByCallback()
+    public function getLastValueByCallback(): void
     {
         $collection = new Collection([1,2,3,4,5,6,7,8,9]);
-        $last = $collection->last(function ($value) {
-            return $value < 5;
-        });
+        $last = $collection->last(fn ($value) => $value < 5);
         $this->assertEquals($last, 4);
     }
 
@@ -299,7 +290,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function containsValue($data)
+    public function containsValue($data): void
     {
         $collection = new Collection($data);
         $data = (array)$data;
@@ -310,18 +301,16 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function containsValueByCallback()
+    public function containsValueByCallback(): void
     {
         $collection = new Collection([1,2,3,4,5,6,7,8,9]);
-        $this->assertTrue($collection->contains(function ($value) {
-            return $value === 4;
-        }));
+        $this->assertTrue($collection->contains(fn ($value) => $value === 4));
     }
 
     /**
      * @test
      */
-    public function pushAndPop()
+    public function pushAndPop(): void
     {
         $collection = new Collection;
         $this->assertCount(0, $collection);
@@ -351,7 +340,7 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function mergeTwoCollections()
+    public function mergeTwoCollections(): void
     {
         $start = new Collection(range(1, 10));
         $this->assertCount(10, $start);
@@ -369,7 +358,7 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function simpleSort($data, $sorted)
+    public function simpleSort($data, $sorted): void
     {
         $collection = new Collection($data);
         $collectionSorted = $collection->sort();
@@ -384,12 +373,10 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function userSort($data, $sorted)
+    public function userSort($data, $sorted): void
     {
         $collection = new Collection($data);
-        $collectionSorted = $collection->sort(function ($a, $b) {
-            return $a <=> $b;
-        });
+        $collectionSorted = $collection->usort(fn ($a, $b) => $a <=> $b);
         foreach ($sorted as $key => $val) {
             $this->assertEquals($val, $collectionSorted[$key]);
         }
@@ -401,7 +388,7 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function simpleSortTypedCollection($data, $sorted)
+    public function simpleSortTypedCollection($data, $sorted): void
     {
         $collection = Collection::newTypedValueCollection(gettype(current($data)), $data);
         $collectionSorted = $collection->sort();
@@ -416,12 +403,10 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function userSortTypedCollection($data, $sorted)
+    public function userSortTypedCollection($data, $sorted): void
     {
         $collection = Collection::newTypedValueCollection(gettype(current($data)), $data);
-        $collectionSorted = $collection->sort(function ($a, $b) {
-            return $a <=> $b;
-        });
+        $collectionSorted = $collection->usort(fn ($a, $b) => $a <=> $b);
         foreach ($sorted as $key => $val) {
             $this->assertEquals($val, $collectionSorted[$key]);
         }
@@ -433,7 +418,7 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function simpleSortTypedKeyCollection($data, $sorted)
+    public function simpleSortTypedKeyCollection($data, $sorted): void
     {
         $collection = Collection::newTypedKeyCollection('integer', $data);
         $collectionSorted = $collection->sort();
@@ -449,12 +434,10 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function userSortTypedKeyCollection($data, $sorted)
+    public function userSortTypedKeyCollection($data, $sorted): void
     {
         $collection = Collection::newTypedKeyCollection('integer', $data);
-        $collectionSorted = $collection->sort(function ($a, $b) {
-            return $a <=> $b;
-        });
+        $collectionSorted = $collection->usort(fn ($a, $b) => $a <=> $b);
         $collectionArray = array_values($collectionSorted->getArrayCopy());
         foreach ($collectionArray as $key=>$value) {
             $this->assertEquals($value, $sorted[$key]);
@@ -467,7 +450,7 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function simpleAsort($data, $sorted)
+    public function simpleAsort($data, $sorted): void
     {
         $collection = new Collection($data);
         $collectionSorted = $collection->asort();
@@ -482,12 +465,10 @@ final class CollectionTest extends TestCase
      * @param $sorted
      * @test
      */
-    public function userAsort($data, $sorted)
+    public function userAsort($data, $sorted): void
     {
         $collection = new Collection($data);
-        $collectionSorted = $collection->asort(function ($a, $b) {
-            return $a <=> $b;
-        });
+        $collectionSorted = $collection->uasort(fn ($a, $b) => $a <=> $b);
         foreach ($collectionSorted as $key => $value) {
             $this->assertEquals($value, $sorted[$key]);
         }
@@ -498,7 +479,7 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function shuffle($data)
+    public function shuffle($data): void
     {
         $collection = new Collection($data);
         for ($i=0; $i<5; $i++) {
@@ -520,7 +501,7 @@ final class CollectionTest extends TestCase
      * @param $expected array
      * @test
      */
-    public function shuffleWithSeed($data, $seed, $expected)
+    public function shuffleWithSeed($data, $seed, $expected): void
     {
         $collection = new Collection($data);
         $shuffled = $collection->shuffle($seed);
@@ -532,7 +513,7 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function collectInto()
+    public function collectInto(): void
     {
         $collection1 = new Collection([1,2,3,4,5]);
         $collection2 = $collection1->into(Collection::class);
@@ -542,21 +523,21 @@ final class CollectionTest extends TestCase
     }
 
     /**
-     * @expectedException \TypeError
      * @test
      */
-    public function failToCollectIntoANonCollectionType()
+    public function failToCollectIntoANonCollectionType(): void
     {
+        $this->expectException(\TypeError::class);
         $collection = new Collection([1,2,3,4,5]);
         $collection->into(\DateTime::class);
     }
 
     /**
-     * @expectedException \TypeError
      * @test
      */
-    public function failToCollectIntoANonExitingType()
+    public function failToCollectIntoANonExitingType(): void
     {
+        $this->expectException(\TypeError::class);
         $collection = new Collection([1,2,3,4,5]);
         $collection->into('my arbitrary type');
     }
@@ -564,21 +545,22 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function mapInto()
+    public function mapInto(): void
     {
         $stringCollection = new class extends Collection
         {
-            protected $valueType = 'string';
+            protected ?string $valueType = 'string';
         };
 
-        $intCollection = new class([1,2,3,4,5]) extends Collection
+        $intCollection = new class ([1,2,3,4,5]) extends Collection
         {
-            protected $valueType = 'integer';
+            protected ?string $valueType = 'integer';
         };
 
-        $finalCollection = $intCollection->mapInto(function (int $int): string {
-            return (string) ($int * 10);
-        }, get_class($stringCollection));
+        $finalCollection = $intCollection->mapInto(
+            fn (int $int): string => (string) ($int * 10),
+            get_class($stringCollection),
+        );
 
         $finalCollection->each(function ($value, $key) use ($intCollection) {
             $this->assertSame((string) ($intCollection[$key] * 10), $value);
@@ -587,18 +569,19 @@ final class CollectionTest extends TestCase
 
     /**
      * @test
-     * @expectedException \TypeError
      */
-    public function mapIntoThrows()
+    public function mapIntoThrows(): void
     {
-        $intCollection = new class([1,2,3,4,5]) extends Collection
+        $this->expectException(\TypeError::class);
+        $intCollection = new class ([1,2,3,4,5]) extends Collection
         {
-            protected $valueType = 'integer';
+            protected ?string $valueType = 'integer';
         };
 
-        $intCollection->mapInto(function (int $int): string {
-            return (string) ($int * 10);
-        }, get_class($intCollection));
+        $intCollection->mapInto(
+            fn (int $int): string => (string) ($int * 10),
+            get_class($intCollection)
+        );
     }
 
     /**
@@ -616,19 +599,18 @@ final class CollectionTest extends TestCase
      * @param $data
      * @test
      */
-    public function collectionWillJsonSerialize($data)
+    public function collectionWillJsonSerialize($data): void
     {
         $collection = new Collection($data);
         $json = json_encode($collection);
-        $this->assertInternalType('string', $json);
-
-        $this->assertInternalType('array', $collection->jsonSerialize());
+        $this->assertIsString($json);
+        $this->assertIsArray($collection->jsonSerialize());
     }
 
     /**
      * @test
      */
-    public function checkForEmptyCollection()
+    public function checkForEmptyCollection(): void
     {
         $collection = new Collection();
 
@@ -639,7 +621,7 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function checkForNonEmptyCollection()
+    public function checkForNonEmptyCollection(): void
     {
         $collection = new Collection([1]);
 
@@ -681,8 +663,8 @@ final class CollectionTest extends TestCase
             ['id' => 9999, 'name' => 'Bob'],
         ];
 
-        $collection = new class($items) extends Collection {
-            protected function keyStrategy($value)
+        $collection = new class ($items) extends Collection {
+            protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
             }
@@ -696,7 +678,7 @@ final class CollectionTest extends TestCase
     public function keyStrategySetWorksOnAppend(): void
     {
         $collection = new class() extends Collection {
-            protected function keyStrategy($value)
+            protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
             }
@@ -713,7 +695,7 @@ final class CollectionTest extends TestCase
     public function keyStrategySetWorksOnOffsetSet(): void
     {
         $collection = new class() extends Collection {
-            protected function keyStrategy($value)
+            protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
             }
@@ -754,9 +736,7 @@ final class CollectionTest extends TestCase
         ]);
         $this->assertSame(
             'foo, bar, baz',
-            $collection->implode(', ', function ($item) {
-                return $item->foo();
-            })
+            $collection->implode(', ', fn ($item) => $item->foo())
         );
     }
 
