@@ -1,16 +1,16 @@
 <?php
 
-use Managur\Collection\Collection;
+use Managur\Collection\ArrayCollection;
 
 if (!function_exists('collect')) {
-    function collect(mixed $items): Collection
+    function collect(mixed $items): \Managur\Collection\Collection
     {
-        return new Collection($items);
+        return new ArrayCollection($items);
     }
 }
 
 if (!function_exists('collectInto')) {
-    function collectInto(string $collectionType, mixed $items): Collection
+    function collectInto(string $collectionType, mixed $items): \Managur\Collection\Collection
     {
         return new $collectionType($items);
     }

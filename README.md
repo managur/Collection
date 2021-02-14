@@ -33,11 +33,12 @@ Composer's autoloader._
 
 There are two ways in that you can use Managur Collections. The first is using
 its class constructor, as follows:
+
 ```php
 <?php
-use Managur\Collection\Collection;
+use Managur\Collection\ArrayCollection;
 
-$collection = new Collection(['your', 'collectible', 'data']);
+$collection = new ArrayCollection(['your', 'collectible', 'data']);
 ```
 
 The second way is to use the handy `collect()` function which is included:
@@ -53,18 +54,18 @@ there are no guarantees that the array indexes or values are of any given type,
 which means that you will regularly need to check them around your application.
 
 Managur Collections are easily constrained to a type, either by extending the
-base `Collection` class yourself, or by using the provided factory methods.
+base `ArrayCollection` class yourself, or by using the provided factory methods.
 
-### Integer Collection
+### Integer ArrayCollection
 If you need a collection that can ONLY have integer values, you can extend
 Managur Collections with your own class as follows:
 
 ```php
 <?php declare(strict_types=1);
 
-use Managur\Collection\Collection;
+use Managur\Collection\ArrayCollection;
 
-final class IntegerCollection extends Collection
+final class IntegerCollection extends ArrayCollection
 {
     protected $valueType = 'integer';
 }
@@ -75,15 +76,16 @@ that you're trying to add to the collection isn't of the type `Integer`, a
 
 Fail fast.
 
-### Miscellaneous Collection with Integer Keys
+### Miscellaneous ArrayCollection with Integer Keys
 Similar to enforcing a type for the values, you can also fix the index (or key)
 types:
+
 ```php
 <?php declare(strict_types=1);
 
-use Managur\Collection\Collection;
+use Managur\Collection\ArrayCollection;
 
-final class IntegerKeyCollection extends Collection
+final class IntegerKeyCollection extends ArrayCollection
 {
     protected $keyType = 'integer';
 }
@@ -133,11 +135,11 @@ functionality as the main collection, but with enforced types for keys and/or
 values:
 
 ```php
-use Managur\Collection\Collection;
+use Managur\Collection\ArrayCollection;
 
-$integerValueCollection = Collection::newTypedValueCollection('integer', [1,2,3,4,5]);
-$integerKeyCollection = Collection::newTypedKeyCollection('integer', ['a','b',1]);
-$integerCollection = Collection::newTypedCollection('integer', 'integer', [1,2,3,4,5]);
+$integerValueCollection = ArrayCollection::newTypedValueCollection('integer', [1,2,3,4,5]);
+$integerKeyCollection = ArrayCollection::newTypedKeyCollection('integer', ['a','b',1]);
+$integerCollection = ArrayCollection::newTypedCollection('integer', 'integer', [1,2,3,4,5]);
 ```
 If you wish, you can use the `newTypedCollection()` method for all purposes,
 passing in `null` for the key (first argument) and/or the value (second
@@ -168,7 +170,7 @@ $ composer cs-fix
 ```
 
 ## Manual
-Full functionality provided with Managur Collection is documented here:
+Full functionality provided with Managur ArrayCollection is documented here:
 
 ### Appending Data
 **Important**: Appending will fail if you are using typed indexes
@@ -213,7 +215,7 @@ recommended over a simple `foreach()` loop in most cases.
 
 Here's a simple example of doubling the values of each value:
 ```php
-$collection = new Collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+$collection = new ArrayCollection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 $doubles = $collection->map(function ($value) {
     return $value * 2;
 });
@@ -242,7 +244,7 @@ This works on the position in the array, *not* the key.
 
 Here's a simple example slicing the first 2 elements from the array:
 ```php
-$collection = new Collection(['a' => 1, 'b' => 2, 'c' => 3]);
+$collection = new ArrayCollection(['a' => 1, 'b' => 2, 'c' => 3]);
 $doubles = $collection->slice(0, 2); // ['a' => 1, 'b' => 2]
 ```
 
@@ -257,7 +259,7 @@ functionality is identical.
 Referring back to the `map()` example, here is an implementation of `each()`
 where we simply `echo` the doubled value, instead:
 ```php
-$collection = new Collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+$collection = new ArrayCollection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 $collection->each(function ($value) {
     echo $value * 2;
 });
@@ -282,7 +284,7 @@ completed.
 In this example, we'll pass in an empty array as our initial value, as you can
 see on the last line:
 ```php
-$collection = new Collection($arrayOfUserObjects);
+$collection = new ArrayCollection($arrayOfUserObjects);
 $emails = $collection->reduce(function ($carry, $user) {
     $carry[] = $user->email();
     return $carry
@@ -307,7 +309,7 @@ values. It does **not** filter the original collection.
 Here's an example where we will filter out all inactive users from our user
 collection:
 ```php
-$collection = new Collection($arrayOfUserObjects);
+$collection = new ArrayCollection($arrayOfUserObjects);
 $filtered = $collection->filter(function ($user) {
     return $user->isActive();
 });
@@ -325,7 +327,7 @@ the callback's criteria by returning true.
 Let's look at an example where we get the first user who has a Gmail email
 address:
 ```php
-$collection = new Collection($arrayOfUserObjects);
+$collection = new ArrayCollection($arrayOfUserObjects);
 $firstGmailUser = $collection->first(function ($user) {
     return false !== stripos($user->emailAddress(), '@gmail.');
 });
@@ -335,7 +337,7 @@ $firstGmailUser = $collection->first(function ($user) {
 `last()` is exactly the same as `first()`, with the (hopefully obvious)
 exception that it returns the last entry:
 ```php
-$collection = new Collection($arrayOfUserObjects);
+$collection = new ArrayCollection($arrayOfUserObjects);
 $lastGmailUser = $collection->last(function ($user) {
     return false !== stripos($user->emailAddress(), '@gmail.');
 });
@@ -349,7 +351,7 @@ computed data.
 
 `contains()` returns a boolean value, so you can use this to check conditions.
 ```php
-$collection = new Collection($arrayOfUserObjects);
+$collection = new ArrayCollection($arrayOfUserObjects);
 $containsAGmailUser = $collection->contains(function ($user) {
     return false !== stripos($user->emailAddress(), '@gmail.');
 });
@@ -362,12 +364,12 @@ The methods `isEmpty()` and `isNotEmpty()` are available to check whether the
 collection contains items or not.
 
 ```php
-$collection = new Collection([]);
+$collection = new ArrayCollection([]);
 $collection->isEmpty(); // true
 ```
 
 ```php
-$collection = new Collection([1, 2, 3]);
+$collection = new ArrayCollection([1, 2, 3]);
 $collection->isNotEmpty(); // true
 ```
 
@@ -383,7 +385,7 @@ $collection->push(5, 6, 7, 8, 9);
 `pop()` is a typical pop method, where the latest value will be returned, while
 simultaneously removed from the collection:
 ```php
-$collection = new Collection([1, 2, 3, 4, 5]);
+$collection = new ArrayCollection([1, 2, 3, 4, 5]);
 $popped = $collection->pop();
 ```
 Now, `$popped` will equal `5`, and the collection itself will now only contain
@@ -393,8 +395,8 @@ the numbers 1 through 4.
 If you have two compatible collections (ie they're not restricted to different
 types), you can merge them in one operation:
 ```php
-$collection1 = new Collection([1,2,3,4,5]);
-$collection2 = new Collection([6,7,8,9,10]);
+$collection1 = new ArrayCollection([1,2,3,4,5]);
+$collection2 = new ArrayCollection([6,7,8,9,10]);
 $merged = $collection1->merge($collection2);
 ```
 Note that a brand new collection is returned, so both `$collection1` and
@@ -404,7 +406,7 @@ Note that a brand new collection is returned, so both `$collection1` and
 The `into()` method provides a readable method to copy the collection into
 another _compatible_ collection:
 ```php
-$collection1 = new Collection([1,2,3,4,5]);
+$collection1 = new ArrayCollection([1,2,3,4,5]);
 $collection2 = $collection1->into(IntegerCollection::class);
 ```
 There is also a provided function that collects directly into your preferred
@@ -426,7 +428,7 @@ If you have specified a fixed index type then we will maintain the indexes for
 each value, similar to calling `asort()` or `uasort()` on a normal array.
 
 ```php
-$collection = new Collection([5,2,6,4,7,1]);
+$collection = new ArrayCollection([5,2,6,4,7,1]);
 $sorted = $collection->sort();
 $alsoSorted = $collection->sort(function ($a, $b) {
     return $a <=> $b;
@@ -440,7 +442,7 @@ by a custom algorithm. The only difference between `sort()` and `asort()` is
 that index associations are maintained, regardless of whether the collection
 key type is constrained or not.
 ```php
-$collection = new Collection([5,2,6,4,7,1]);
+$collection = new ArrayCollection([5,2,6,4,7,1]);
 $sorted = $collection->asort();
 $alsoSorted = $collection->asort(function ($a, $b) {
     return $a <=> $b;
@@ -452,7 +454,7 @@ This method will return a copy of the collection with the sorting applied.
 The `shuffle()` method will take your values, shuffle them randomly, and then
 return a new instance of the collection with the shuffled data:
 ```php
-$collection = new Collection([1,2,3,4,5]);
+$collection = new ArrayCollection([1,2,3,4,5]);
 $shuffled = $collection->shuffle();
 ```
 `shuffle()` also takes an optional integer _seed_, which will be used to
@@ -467,14 +469,14 @@ value. It will never return a different order for this combination.
 The `implode()` method will take your collection and return a string with the
 items joined together with `$glue`
 ```php
-$collection = new Collection(['a', 'b']);
+$collection = new ArrayCollection(['a', 'b']);
 $joined = $collection->implode(', '); // 'a, b'
 ```
 
 You may also pass an optional callable as the second argument which allows you
 to pick the specific properties from your collected objects when imploding:
 ```php
-$collection = new Collection($users);
+$collection = new ArrayCollection($users);
 $joined = $collection->implode(', ', function (User $user): string {
     return $user->name();
 });

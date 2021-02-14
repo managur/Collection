@@ -2,6 +2,7 @@
 
 namespace tests;
 
+use Managur\Collection\ArrayCollection;
 use Managur\Collection\Collection;
 use PHPUnit\Framework\TestCase;
 
@@ -15,11 +16,11 @@ final class CollectionTest extends TestCase
     public function functions($data): void
     {
         $collection = collect($data);
-        $this->assertInstanceOf(Collection::class, $collection);
+        $this->assertInstanceOf(ArrayCollection::class, $collection);
         $this->assertCount(count($data), $collection);
 
-        $collection = collectInto(Collection::class, $data);
-        $this->assertInstanceOf(Collection::class, $collection);
+        $collection = collectInto(ArrayCollection::class, $data);
+        $this->assertInstanceOf(ArrayCollection::class, $collection);
         $this->assertCount(count($data), $collection);
     }
 
@@ -29,8 +30,8 @@ final class CollectionTest extends TestCase
     public function nonIterableTypeCollects(): void
     {
         $str = 'a string of text';
-        $collection = new Collection($str);
-        $this->assertInstanceOf(Collection::class, $collection);
+        $collection = new ArrayCollection($str);
+        $this->assertInstanceOf(ArrayCollection::class, $collection);
         $this->assertEquals($str, $collection[0]);
     }
 
@@ -41,8 +42,8 @@ final class CollectionTest extends TestCase
      */
     public function basicTypeAndCount($data): void
     {
-        $collection = new Collection($data);
-        $this->assertInstanceOf(Collection::class, $collection);
+        $collection = new ArrayCollection($data);
+        $this->assertInstanceOf(ArrayCollection::class, $collection);
         $this->assertEquals(count($data), count($collection));
 
     }
@@ -54,7 +55,7 @@ final class CollectionTest extends TestCase
      */
     public function appendByMethod($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collection->append('test');
         $this->assertEquals(count($data)+1, count($collection));
     }
@@ -66,7 +67,7 @@ final class CollectionTest extends TestCase
      */
     public function appendLikeArray($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collection[] = 'test';
         $this->assertEquals(count($data)+1, count($collection));
     }
@@ -78,7 +79,7 @@ final class CollectionTest extends TestCase
      */
     public function offsetSetByMethod($data): void
     {
-        $collection = new Collection;
+        $collection = new ArrayCollection;
         foreach ($data as $key=>$val) {
             $collection->offsetSet($key, $val);
             $this->assertEquals($val, $collection[$key]);
@@ -93,7 +94,7 @@ final class CollectionTest extends TestCase
      */
     public function offsetSetLikeArray($data): void
     {
-        $collection = new Collection;
+        $collection = new ArrayCollection;
         foreach ($data as $key=>$val) {
             $collection[$key] = $val;
             $this->assertEquals($val, $collection[$key]);
@@ -137,7 +138,7 @@ final class CollectionTest extends TestCase
      */
     public function checkMapOfCollectionData($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collection->map(function ($value, $key) use ($data) {
             $this->assertEquals($data[$key], $value);
             return $value;
@@ -155,7 +156,7 @@ final class CollectionTest extends TestCase
      */
     public function checkEachEntryInTheCollection($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collection->each(function ($value, $key) use ($data) {
             $this->assertEquals($data[$key], $value);
         });
@@ -168,7 +169,7 @@ final class CollectionTest extends TestCase
      */
     public function reduceTheCollectionToAString($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $reduced = $collection->reduce(function($carry, $value) {
             return $carry . json_encode($value);
         }, '');
@@ -188,7 +189,7 @@ final class CollectionTest extends TestCase
      */
     public function filterTheCollection($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $filtered = $collection->filter();
         if (0 === count($filtered)) {
             // Empty values were all removed
@@ -206,7 +207,7 @@ final class CollectionTest extends TestCase
      */
     public function filterTheCollectionWithACallable($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $filtered = $collection->filter(fn ($value) => !empty($value));
         if (0 === count($filtered)) {
             // Empty values were all removed
@@ -222,7 +223,7 @@ final class CollectionTest extends TestCase
      */
     public function filterOutOddNumbers(): void
     {
-        $collection = new Collection(range(1, 200));
+        $collection = new ArrayCollection(range(1, 200));
         $filtered = $collection->filter(fn ($value) => $value % 2 === 0);
         foreach ($filtered as $even) {
             $this->assertTrue(is_int($even / 2));
@@ -236,7 +237,7 @@ final class CollectionTest extends TestCase
      */
     public function getFirstValue($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $first = $collection->first();
         $expected = null;
         foreach ($data as $item) {
@@ -252,7 +253,7 @@ final class CollectionTest extends TestCase
      */
     public function getFirstValueByCallback(): void
     {
-        $collection = new Collection([1,2,3,4,5,6,7,8,9]);
+        $collection = new ArrayCollection([1,2,3,4,5,6,7,8,9]);
         $first = $collection->first(fn ($value) => $value >= 4);
         $this->assertEquals($first, 4);
     }
@@ -264,7 +265,7 @@ final class CollectionTest extends TestCase
      */
     public function getLastValue($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $last = $collection->last();
         $expected = null;
         foreach ($data as $item) {
@@ -280,7 +281,7 @@ final class CollectionTest extends TestCase
      */
     public function getLastValueByCallback(): void
     {
-        $collection = new Collection([1,2,3,4,5,6,7,8,9]);
+        $collection = new ArrayCollection([1,2,3,4,5,6,7,8,9]);
         $last = $collection->last(fn ($value) => $value < 5);
         $this->assertEquals($last, 4);
     }
@@ -292,7 +293,7 @@ final class CollectionTest extends TestCase
      */
     public function containsValue($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $data = (array)$data;
         $randomValue = array_rand($data);
         $this->assertTrue($collection->contains($data[$randomValue]));
@@ -303,7 +304,7 @@ final class CollectionTest extends TestCase
      */
     public function containsValueByCallback(): void
     {
-        $collection = new Collection([1,2,3,4,5,6,7,8,9]);
+        $collection = new ArrayCollection([1,2,3,4,5,6,7,8,9]);
         $this->assertTrue($collection->contains(fn ($value) => $value === 4));
     }
 
@@ -312,7 +313,7 @@ final class CollectionTest extends TestCase
      */
     public function pushAndPop(): void
     {
-        $collection = new Collection;
+        $collection = new ArrayCollection;
         $this->assertCount(0, $collection);
         $collection->push(5);
         $this->assertCount(1, $collection);
@@ -342,9 +343,9 @@ final class CollectionTest extends TestCase
      */
     public function mergeTwoCollections(): void
     {
-        $start = new Collection(range(1, 10));
+        $start = new ArrayCollection(range(1, 10));
         $this->assertCount(10, $start);
-        $end = new Collection(range(21, 30));
+        $end = new ArrayCollection(range(21, 30));
         $this->assertCount(10, $end);
         $merged = $start->merge($end);
         $this->assertCount(20, $merged);
@@ -360,7 +361,7 @@ final class CollectionTest extends TestCase
      */
     public function simpleSort($data, $sorted): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collectionSorted = $collection->sort();
         foreach ($sorted as $key => $val) {
             $this->assertEquals($val, $collectionSorted[$key]);
@@ -375,7 +376,7 @@ final class CollectionTest extends TestCase
      */
     public function userSort($data, $sorted): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collectionSorted = $collection->usort(fn ($a, $b) => $a <=> $b);
         foreach ($sorted as $key => $val) {
             $this->assertEquals($val, $collectionSorted[$key]);
@@ -390,7 +391,7 @@ final class CollectionTest extends TestCase
      */
     public function simpleSortTypedCollection($data, $sorted): void
     {
-        $collection = Collection::newTypedValueCollection(gettype(current($data)), $data);
+        $collection = ArrayCollection::newTypedValueCollection(gettype(current($data)), $data);
         $collectionSorted = $collection->sort();
         foreach ($sorted as $key => $val) {
             $this->assertEquals($val, $collectionSorted[$key]);
@@ -405,7 +406,7 @@ final class CollectionTest extends TestCase
      */
     public function userSortTypedCollection($data, $sorted): void
     {
-        $collection = Collection::newTypedValueCollection(gettype(current($data)), $data);
+        $collection = ArrayCollection::newTypedValueCollection(gettype(current($data)), $data);
         $collectionSorted = $collection->usort(fn ($a, $b) => $a <=> $b);
         foreach ($sorted as $key => $val) {
             $this->assertEquals($val, $collectionSorted[$key]);
@@ -420,7 +421,7 @@ final class CollectionTest extends TestCase
      */
     public function simpleSortTypedKeyCollection($data, $sorted): void
     {
-        $collection = Collection::newTypedKeyCollection('integer', $data);
+        $collection = ArrayCollection::newTypedKeyCollection('integer', $data);
         $collectionSorted = $collection->sort();
         $collectionArray = array_values($collectionSorted->getArrayCopy());
         foreach ($collectionArray as $key=>$value) {
@@ -436,7 +437,7 @@ final class CollectionTest extends TestCase
      */
     public function userSortTypedKeyCollection($data, $sorted): void
     {
-        $collection = Collection::newTypedKeyCollection('integer', $data);
+        $collection = ArrayCollection::newTypedKeyCollection('integer', $data);
         $collectionSorted = $collection->usort(fn ($a, $b) => $a <=> $b);
         $collectionArray = array_values($collectionSorted->getArrayCopy());
         foreach ($collectionArray as $key=>$value) {
@@ -452,7 +453,7 @@ final class CollectionTest extends TestCase
      */
     public function simpleAsort($data, $sorted): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collectionSorted = $collection->asort();
         foreach ($collectionSorted as $key => $value) {
             $this->assertEquals($value, $sorted[$key]);
@@ -467,7 +468,7 @@ final class CollectionTest extends TestCase
      */
     public function userAsort($data, $sorted): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $collectionSorted = $collection->uasort(fn ($a, $b) => $a <=> $b);
         foreach ($collectionSorted as $key => $value) {
             $this->assertEquals($value, $sorted[$key]);
@@ -481,7 +482,7 @@ final class CollectionTest extends TestCase
      */
     public function shuffle($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $shuffled = $collection->shuffle();
         $shuffledArray = $shuffled->getArrayCopy();
         $this->assertNotEquals($shuffledArray, $data);
@@ -496,7 +497,7 @@ final class CollectionTest extends TestCase
      */
     public function shuffleWithSeed($data, $seed, $expected): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $shuffled = $collection->shuffle($seed);
         $shuffledArray = $shuffled->getArrayCopy();
         $this->assertNotEquals($shuffledArray, $data);
@@ -508,11 +509,11 @@ final class CollectionTest extends TestCase
      */
     public function collectInto(): void
     {
-        $collection1 = new Collection([1,2,3,4,5]);
-        $collection2 = $collection1->into(Collection::class);
+        $collection1 = new ArrayCollection([1,2,3,4,5]);
+        $collection2 = $collection1->into(ArrayCollection::class);
         $this->assertEquals($collection1, $collection2);
         $this->assertNotEquals(spl_object_hash($collection1), spl_object_hash($collection2));
-        $this->assertInstanceOf(Collection::class, $collection2);
+        $this->assertInstanceOf(ArrayCollection::class, $collection2);
     }
 
     /**
@@ -521,7 +522,7 @@ final class CollectionTest extends TestCase
     public function failToCollectIntoANonCollectionType(): void
     {
         $this->expectException(\TypeError::class);
-        $collection = new Collection([1,2,3,4,5]);
+        $collection = new ArrayCollection([1,2,3,4,5]);
         $collection->into(\DateTime::class);
     }
 
@@ -531,7 +532,7 @@ final class CollectionTest extends TestCase
     public function failToCollectIntoANonExitingType(): void
     {
         $this->expectException(\TypeError::class);
-        $collection = new Collection([1,2,3,4,5]);
+        $collection = new ArrayCollection([1,2,3,4,5]);
         $collection->into('my arbitrary type');
     }
 
@@ -540,12 +541,12 @@ final class CollectionTest extends TestCase
      */
     public function mapInto(): void
     {
-        $stringCollection = new class extends Collection
+        $stringCollection = new class extends ArrayCollection
         {
             protected ?string $valueType = 'string';
         };
 
-        $intCollection = new class ([1,2,3,4,5]) extends Collection
+        $intCollection = new class ([1,2,3,4,5]) extends ArrayCollection
         {
             protected ?string $valueType = 'integer';
         };
@@ -566,7 +567,7 @@ final class CollectionTest extends TestCase
     public function mapIntoThrows(): void
     {
         $this->expectException(\TypeError::class);
-        $intCollection = new class ([1,2,3,4,5]) extends Collection
+        $intCollection = new class ([1,2,3,4,5]) extends ArrayCollection
         {
             protected ?string $valueType = 'integer';
         };
@@ -582,7 +583,7 @@ final class CollectionTest extends TestCase
      */
     public function slice(): void
     {
-        $collection = new Collection(['a' => 1, 'b' => 2, 'c' => 3]);
+        $collection = new ArrayCollection(['a' => 1, 'b' => 2, 'c' => 3]);
 
         $this->assertSame(['a' => 1, 'b' => 2], $collection->slice(0, 2)->getArrayCopy());
     }
@@ -594,7 +595,7 @@ final class CollectionTest extends TestCase
      */
     public function collectionWillJsonSerialize($data): void
     {
-        $collection = new Collection($data);
+        $collection = new ArrayCollection($data);
         $json = json_encode($collection);
         $this->assertIsString($json);
         $this->assertIsArray($collection->jsonSerialize());
@@ -605,7 +606,7 @@ final class CollectionTest extends TestCase
      */
     public function checkForEmptyCollection(): void
     {
-        $collection = new Collection();
+        $collection = new ArrayCollection();
 
         $this->assertTrue($collection->isEmpty());
         $this->assertFalse($collection->isNotEmpty());
@@ -616,7 +617,7 @@ final class CollectionTest extends TestCase
      */
     public function checkForNonEmptyCollection(): void
     {
-        $collection = new Collection([1]);
+        $collection = new ArrayCollection([1]);
 
         $this->assertTrue($collection->isNotEmpty());
         $this->assertFalse($collection->isEmpty());
@@ -625,7 +626,7 @@ final class CollectionTest extends TestCase
     /** @test */
     public function keyStrategyNotSetWorksOnConstruction(): void
     {
-        $collection = new Collection([1]);
+        $collection = new ArrayCollection([1]);
 
         $this->assertSame($collection[0], 1);
     }
@@ -633,7 +634,7 @@ final class CollectionTest extends TestCase
     /** @test */
     public function keyStrategyNotSetWorksWithAppend(): void
     {
-        $collection = new Collection();
+        $collection = new ArrayCollection();
         $collection->append(1);
 
         $this->assertSame($collection[0], 1);
@@ -642,7 +643,7 @@ final class CollectionTest extends TestCase
     /** @test */
     public function keyStrategyNotSetWorksWithOffsetSet(): void
     {
-        $collection = new Collection();
+        $collection = new ArrayCollection();
         $collection[] = 1;
 
         $this->assertSame($collection[0], 1);
@@ -656,7 +657,7 @@ final class CollectionTest extends TestCase
             ['id' => 9999, 'name' => 'Bob'],
         ];
 
-        $collection = new class ($items) extends Collection {
+        $collection = new class ($items) extends ArrayCollection {
             protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
@@ -670,7 +671,7 @@ final class CollectionTest extends TestCase
     /** @test */
     public function keyStrategySetWorksOnAppend(): void
     {
-        $collection = new class() extends Collection {
+        $collection = new class() extends ArrayCollection {
             protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
@@ -687,7 +688,7 @@ final class CollectionTest extends TestCase
     /** @test */
     public function keyStrategySetWorksOnOffsetSet(): void
     {
-        $collection = new class() extends Collection {
+        $collection = new class() extends ArrayCollection {
             protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
@@ -704,7 +705,7 @@ final class CollectionTest extends TestCase
     /** @test */
     public function itImplodesStrings(): void
     {
-        $collection = new Collection(['a', 'b']);
+        $collection = new ArrayCollection(['a', 'b']);
         $this->assertSame('a, b', $collection->implode(', '));
     }
 
@@ -722,7 +723,7 @@ final class CollectionTest extends TestCase
                 }
             };
         };
-        $collection = new Collection([
+        $collection = new ArrayCollection([
             $newClass('foo'),
             $newClass('bar'),
             $newClass('baz')
@@ -734,11 +735,8 @@ final class CollectionTest extends TestCase
     }
 
 
-
-
-
     /**
-     * Get a Strict Typed Collection
+     * Get a Strict Typed ArrayCollection
      *
      * Set the key and value types to enforce strict types within the collection
      *
@@ -749,7 +747,7 @@ final class CollectionTest extends TestCase
      */
     private function getTypedCollection($data, string $keyType=null, string $valueType=null): Collection
     {
-        return Collection::newTypedCollection($keyType, $valueType, $data);
+        return ArrayCollection::newTypedCollection($keyType, $valueType, $data);
     }
 
     public function collectibles(): array
@@ -758,7 +756,7 @@ final class CollectionTest extends TestCase
             [[[],[],[],[]], null, 'array'],
             [[8,9,3,4,1,6,2,10,9,5,7], null, 'integer'],
             [['f','b','e','c','d','a'], 'integer', 'string'],
-            [new Collection([4,3,5,1,2,6]), 'integer', null],
+            [new ArrayCollection([4,3,5,1,2,6]), 'integer', null],
             [new class implements \JsonSerializable, \Countable { public function count(){ return count($this->jsonSerialize()); } public function jsonSerialize(){ return ['a','b','c','d','e','f']; }}],
         ];
     }
