@@ -34,7 +34,7 @@ class Collection extends ArrayObject implements JsonSerializable
     protected ?string $valueType = null;
 
     // phpcs:ignore PSR12.Operators.OperatorSpacing -- Broken until 3.6.0
-    public function __construct(array|self|JsonSerializable|Traversable $items = [])
+    public function __construct(mixed $items = [])
     {
         foreach ($this->arrayItems($items) as $key => $value) {
             $this->offsetSet($key, $value);
@@ -44,11 +44,11 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Prepare given items into array suitable for instantiation
      *
-     * @param array|Collection|JsonSerializable|Traversable $items
+     * @param mixed $items
      * @return array
      */
     // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
-    private function arrayItems(array|self|JsonSerializable|Traversable $items): array
+    private function arrayItems(mixed $items): array
     {
         if (is_array($items)) {
             return $items;
@@ -523,11 +523,11 @@ class Collection extends ArrayObject implements JsonSerializable
      * Get a New Anonymous Typed Value Collection
      *
      * @param string $valueType The type that all values must match
-     * @param traversable|array $data
+     * @param mixed $data
      * @return self
      */
     // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
-    public static function newTypedValueCollection(string $valueType, traversable|array $data = []): Collection
+    public static function newTypedValueCollection(string $valueType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, null, $valueType);
     }
@@ -536,11 +536,11 @@ class Collection extends ArrayObject implements JsonSerializable
      * Get a New Anonymous Typed Key Collection
      *
      * @param string $keyType The type that all keys must match
-     * @param traversable|array $data
+     * @param mixed $data
      * @return self
      */
     // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
-    public static function newTypedKeyCollection(string $keyType, traversable|array $data = []): Collection
+    public static function newTypedKeyCollection(string $keyType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, $keyType);
     }
@@ -550,10 +550,10 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param ?string $keyType The type that all keys must match
      * @param ?string $valueType The type that all values must match
-     * @param array $data
+     * @param mixed $data
      * @return self
      */
-    public static function newTypedCollection(?string $keyType, ?string $valueType, array $data = []): Collection
+    public static function newTypedCollection(?string $keyType, ?string $valueType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, $keyType, $valueType);
     }

@@ -245,7 +245,6 @@ final class CollectionTest extends TestCase
             }
         }
         $this->assertEquals($expected, $first);
-
     }
 
     /**
@@ -543,12 +542,12 @@ final class CollectionTest extends TestCase
     {
         $stringCollection = new class extends Collection
         {
-            protected $valueType = 'string';
+            protected ?string $valueType = 'string';
         };
 
-        $intCollection = new class([1,2,3,4,5]) extends Collection
+        $intCollection = new class ([1,2,3,4,5]) extends Collection
         {
-            protected $valueType = 'integer';
+            protected ?string $valueType = 'integer';
         };
 
         $finalCollection = $intCollection->mapInto(
@@ -567,9 +566,9 @@ final class CollectionTest extends TestCase
     public function mapIntoThrows(): void
     {
         $this->expectException(\TypeError::class);
-        $intCollection = new class([1,2,3,4,5]) extends Collection
+        $intCollection = new class ([1,2,3,4,5]) extends Collection
         {
-            protected $valueType = 'integer';
+            protected ?string $valueType = 'integer';
         };
 
         $intCollection->mapInto(
@@ -657,8 +656,8 @@ final class CollectionTest extends TestCase
             ['id' => 9999, 'name' => 'Bob'],
         ];
 
-        $collection = new class($items) extends Collection {
-            protected function keyStrategy($value)
+        $collection = new class ($items) extends Collection {
+            protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
             }
@@ -672,7 +671,7 @@ final class CollectionTest extends TestCase
     public function keyStrategySetWorksOnAppend(): void
     {
         $collection = new class() extends Collection {
-            protected function keyStrategy($value)
+            protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
             }
@@ -689,7 +688,7 @@ final class CollectionTest extends TestCase
     public function keyStrategySetWorksOnOffsetSet(): void
     {
         $collection = new class() extends Collection {
-            protected function keyStrategy($value)
+            protected function keyStrategy(mixed $value): mixed
             {
                 return $value['id'];
             }
