@@ -38,7 +38,7 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "cs": "vendor/bin/phpcs --standard=psr2 src/ -n",
-    "cs-fix": "vendor/bin/phpcbf --standard=psr2 src/ -n"
+    "cs": "vendor/bin/phpcs --standard=psr12 src/ -s",
+    "cs-fix": "vendor/bin/phpcbf --standard=psr12 src/ -s"
   }
 }

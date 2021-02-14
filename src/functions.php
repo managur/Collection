@@ -3,14 +3,14 @@
 use Managur\Collection\Collection;
 
 if (!function_exists('collect')) {
-    function collect($items): Collection
+    function collect(mixed $items): Collection
     {
         return new Collection($items);
     }
 }
 
 if (!function_exists('collectInto')) {
-    function collectInto(string $collectionType, $items): Collection
+    function collectInto(string $collectionType, mixed $items): Collection
     {
         return new $collectionType($items);
     }

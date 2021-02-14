@@ -32,7 +32,7 @@ jobs:
       - name: PHPUnit
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
       - name: PHPCS
-        run: vendor/bin/phpcs --standard=psr12 src/ -n
+        run: vendor/bin/phpcs --standard=psr12 src/ -s
   coverage:
     name: Coverage Reports
     runs-on: ubuntu-latest
