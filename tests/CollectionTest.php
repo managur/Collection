@@ -482,8 +482,15 @@ final class CollectionTest extends TestCase
     public function shuffle($data): void
     {
         $collection = new Collection($data);
-        $shuffled = $collection->shuffle();
-        $shuffledArray = $shuffled->getArrayCopy();
+        for ($i=0; $i<5; $i++) {
+            // Sometimes we can shuffle to the original config, so give us a couple of goes to get it right
+            $shuffled = $collection->shuffle();
+            $shuffledArray = $shuffled->getArrayCopy();
+            if ($shuffledArray !== $data) {
+                break;
+            }
+        }
+
         $this->assertNotEquals($shuffledArray, $data);
     }
 
