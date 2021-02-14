@@ -189,12 +189,12 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public static function newCollectionOfType(string $type, $items = []): Collection
     {
-        if (!class_exists($type)) {
+        if (class_exists($type) === false) {
             throw new TypeError(sprintf('Unknown class name "%s"', $type));
         }
         if (
             Collection::class !== $type &&
-            !is_subclass_of($type, Collection::class)
+            is_subclass_of($type, Collection::class) === false
         ) {
             throw new TypeError(sprintf('Class "%s" is not a Collection type', $type));
         }
@@ -313,7 +313,7 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public function last(callable $callable = null, $default = null): mixed
     {
-        if (!$callable) {
+        if (is_callable($callable) === false) {
             $array = array_filter($this->getArrayCopy());
             return empty($array) ? $default : end($array);
         }
