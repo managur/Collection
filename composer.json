@@ -7,11 +7,11 @@
   ],
   "homepage": "https://github.com/managur/Collection",
   "require-dev": {
-    "phpunit/phpunit": "^7.0",
-    "squizlabs/php_codesniffer": "^3.3"
+    "squizlabs/php_codesniffer": "^3.3",
+    "phpunit/phpunit": "^9.5"
   },
   "require": {
-    "php": "~7.2"
+    "php": "~8.0"
   },
   "license": "MIT",
   "authors": [
@@ -38,7 +38,7 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "cs": "vendor/bin/phpcs --standard=psr2 src/ -n",
-    "cs-fix": "vendor/bin/phpcbf --standard=psr2 src/ -n"
+    "cs": "vendor/bin/phpcs --standard=psr12 src/ -s",
+    "cs-fix": "vendor/bin/phpcbf --standard=psr12 src/ -s"
   }
 }

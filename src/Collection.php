@@ -1,14 +1,21 @@
 <?php
+
 namespace Managur\Collection;
 
 use ArrayObject;
 use JsonSerializable;
-use TypeError;
 use ReflectionClass;
+use Traversable;
+use TypeError;
+
+use function gettype;
+
+use const ARRAY_FILTER_USE_BOTH;
+use const ARRAY_FILTER_USE_KEY;
+use const SORT_REGULAR;
 
 /**
  * Managur Generic Collection Class
- *
  * NOTE: Collections are NOT immutable. However, calling any of the functional methods (map/reduce/filter/sort etc) will
  * return a clone of the original with the required changes applied.
  *
@@ -17,18 +24,17 @@ use ReflectionClass;
  */
 class Collection extends ArrayObject implements JsonSerializable
 {
-
-    const FILTER_USE_KEY = \ARRAY_FILTER_USE_KEY;
-    const FILTER_USE_BOTH = \ARRAY_FILTER_USE_BOTH;
+    public const FILTER_USE_KEY = ARRAY_FILTER_USE_KEY;
+    public const FILTER_USE_BOTH = ARRAY_FILTER_USE_BOTH;
 
     /** @var string|null Enforce collection key type by defining type here */
-    protected $keyType = null;
+    protected ?string $keyType = null;
 
     /** @var string|null Enforce collection value type by defining type here */
-    protected $valueType = null;
+    protected ?string $valueType = null;
 
-
-    public function __construct($items = [])
+    // phpcs:ignore PSR12.Operators.OperatorSpacing -- Broken until 3.6.0
+    public function __construct(mixed $items = [])
     {
         foreach ($this->arrayItems($items) as $key => $value) {
             $this->offsetSet($key, $value);
@@ -38,16 +44,21 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Prepare given items into array suitable for instantiation
      *
-     * @param $items
+     * @param mixed $items
      * @return array
      */
-    private function arrayItems($items)
+    // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
+    private function arrayItems(mixed $items): array
     {
         if (is_array($items)) {
             return $items;
-        } elseif ($items instanceof self) {
+        }
+
+        if ($items instanceof self) {
             return $items->getArrayCopy();
-        } elseif ($items instanceof JsonSerializable) {
+        }
+
+        if ($items instanceof JsonSerializable) {
             return $items->jsonSerialize();
         }
 
@@ -66,10 +77,10 @@ class Collection extends ArrayObject implements JsonSerializable
      * }
      * ```
      *
-     * @param $value
+     * @param mixed $value
      * @return mixed
      */
-    protected function keyStrategy($value)
+    protected function keyStrategy(mixed $value): mixed
     {
         return null;
     }
@@ -83,7 +94,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param mixed $value
      */
-    public function append($value)
+    public function append(mixed $value): void
     {
         $key = $this->keyStrategy($value);
         if ($key !== null) {
@@ -94,19 +105,19 @@ class Collection extends ArrayObject implements JsonSerializable
     }
 
     /**
-     * @param mixed $index
+     * @param mixed $key
      * @param mixed $value
      */
-    public function offsetSet($index, $value)
+    public function offsetSet(mixed $key, mixed $value): void
     {
-        $newIndex = $this->keyStrategy($value);
+        $newKey = $this->keyStrategy($value);
 
-        if ($newIndex !== null) {
-            $index = $newIndex;
+        if ($newKey !== null) {
+            $key = $newKey;
         }
 
         parent::offsetSet(
-            $this->checkType($index, $this->keyType),
+            $this->checkType($key, $this->keyType),
             $this->checkType($value, $this->valueType)
         );
     }
@@ -122,10 +133,10 @@ class Collection extends ArrayObject implements JsonSerializable
      * @return mixed
      * @throws TypeError
      */
-    private function checkType($value, ?string $expectedType)
+    private function checkType(mixed $value, ?string $expectedType): mixed
     {
         if ($expectedType) {
-            $valueType = \gettype($value);
+            $valueType = gettype($value);
             if ($valueType === 'object') {
                 if (!$value instanceof $expectedType) {
                     throw new TypeError(sprintf(
@@ -178,11 +189,12 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public static function newCollectionOfType(string $type, $items = []): Collection
     {
-        if (!class_exists($type)) {
+        if (class_exists($type) === false) {
             throw new TypeError(sprintf('Unknown class name "%s"', $type));
         }
-        if (!is_subclass_of($type, Collection::class) &&
-            Collection::class !== $type
+        if (
+            Collection::class !== $type &&
+            is_subclass_of($type, Collection::class) === false
         ) {
             throw new TypeError(sprintf('Class "%s" is not a Collection type', $type));
         }
@@ -195,7 +207,8 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param callable $callable May take up to two arguments: First is the array value, the second is the array key
      * @return static New collection of the same type
      */
-    public function map(callable $callable): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function map(callable $callable): static
     {
         $array = $this->getArrayCopy();
         return $this->getNewInstance(array_map($callable, $array, array_keys($array)));
@@ -209,13 +222,18 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param int $offset   If offset is non-negative, the sequence will start at that offset in the array.
      *                      If offset is negative, the sequence will start that far from the end of the array.
      *                      The offset parameter denotes the position in the array, not the key.
-     * @param int $length   If length is given and is positive, then the sequence will have up to that many elements in it.
-     *                      If the array is shorter than the length, then only the available array elements will be present.
-     *                      If length is given and is negative then the sequence will stop that many elements from the end of the array.
-     *                      If it is omitted, then the sequence will have everything from offset up until the end of the array.
+     * @param ?int $length  If length is given and is positive, then the sequence will have up to that many elements in
+     *                      it.
+     *                      If the array is shorter than the length, then only the available array elements will be
+     *                      present.
+     *                      If length is given and is negative then the sequence will stop that many elements from the
+     *                      end of the array.
+     *                      If it is omitted, then the sequence will have everything from offset up until the end of the
+     *                      array.
      * @return static New collection of the same type
      */
-    public function slice(int $offset, int $length = null): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function slice(int $offset, ?int $length = null): static
     {
         return $this->getNewInstance(array_slice($this->getArrayCopy(), $offset, $length));
     }
@@ -227,7 +245,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param callable $callable
      */
-    public function each(callable $callable)
+    public function each(callable $callable): void
     {
         $array = $this->getArrayCopy();
         array_walk($array, $callable);
@@ -236,11 +254,12 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Reduce Collection by Callable
      *
-     * @param callable $callable Requires two arguments; the first to carry from the previous iteration, and the second as the item
+     * @param callable $callable Requires two arguments; the first to carry from the previous iteration, and the second
+     *                           as the item
      * @param mixed $carry Initial value, or returned if array is empty
      * @return mixed Type depends on return value of $callable
      */
-    public function reduce(callable $callable, $carry = null)
+    public function reduce(callable $callable, mixed $carry = null): mixed
     {
         $array = $this->getArrayCopy();
         return array_reduce($array, $callable, $carry);
@@ -253,7 +272,8 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param int|null $flag Collection::FILTER_USE_KEY or Collection::FILTER_USE_BOTH
      * @return static
      */
-    public function filter($callable = null, int $flag = null): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function filter(?callable $callable = null, ?int $flag = null): static
     {
         $array = $this->getArrayCopy();
         if ($callable && is_callable($callable)) {
@@ -265,16 +285,15 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get First Entry From Collection
      *
-     * @param callable|null $callable If provided will return the first value that this callback returns
-     * @param mixed|null If no result is found, return this instead
+     * @param ?callable(mixed $item, mixed $key):mixed $callable If provided will return the first value that this
+     *   callback returns
+     * @param mixed $default If no result is found, return this instead
      * @return mixed
      */
-    public function first(callable $callable = null, $default = null)
+    public function first(?callable $callable = null, mixed $default = null): mixed
     {
-        if (!$callable) {
-            $callable = function ($item) {
-                return $item;
-            };
+        if (is_callable($callable) === false) {
+            $callable = static fn ($item, $key) => $item;
         }
         $data = array_filter($this->getArrayCopy());
         foreach ($data as $key => $item) {
@@ -292,9 +311,9 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed|null If no result is found, return this instead
      * @return mixed
      */
-    public function last(callable $callable = null, $default = null)
+    public function last(?callable $callable = null, mixed $default = null): mixed
     {
-        if (!$callable) {
+        if (is_callable($callable) === false) {
             $array = array_filter($this->getArrayCopy());
             return empty($array) ? $default : end($array);
         }
@@ -307,12 +326,12 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed|callable $check
      * @return bool
      */
-    public function contains($check): bool
+    public function contains(mixed $check): bool
     {
         if (is_callable($check)) {
             return (bool)$this->first($check);
         }
-        return in_array($check, $this->getArrayCopy());
+        return in_array($check, $this->getArrayCopy(), true);
     }
 
     /**
@@ -320,7 +339,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @return mixed
      */
-    public function pop()
+    public function pop(): mixed
     {
         $array  = $this->getArrayCopy();
         $popped = array_pop($array);
@@ -333,7 +352,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param array ...$vals
      */
-    public function push(...$vals)
+    public function push(...$vals): void
     {
         foreach ($vals as $val) {
             $this->append($val);
@@ -348,7 +367,8 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param Collection $add
      * @return static
      */
-    public function merge(Collection $add): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function merge(Collection $add): static
     {
         $clone = clone($this);
         foreach ($add as $newElement) {
@@ -362,24 +382,37 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * Functions the same as asort() if index types are constrained
      *
-     * @param callable|null $callable
+     * @param int $flags
      * @return static
      */
-    public function sort(callable $callable = null): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function sort(int $flags = SORT_REGULAR): static
     {
         $data = $this->getArrayCopy();
-        if ($callable) {
-            if ($this->keyType) {
-                uasort($data, $callable);
-            } else {
-                usort($data, $callable);
-            }
+        if ($this->keyType) {
+            asort($data, $flags);
         } else {
-            if ($this->keyType) {
-                asort($data);
-            } else {
-                sort($data);
-            }
+            sort($data, $flags);
+        }
+        return $this->getNewInstance($data);
+    }
+
+    /**
+     *Get a New Collection With Contents Sorted By User Defined Callable
+     *
+     * Functions the same as uasort() if index types are constrained
+     *
+     * @param $callable
+     * @return static
+     */
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function usort(callable $callable): static
+    {
+        $data = $this->getArrayCopy();
+        if ($this->keyType) {
+            uasort($data, $callable);
+        } else {
+            usort($data, $callable);
         }
         return $this->getNewInstance($data);
     }
@@ -387,17 +420,28 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Collection With Contents Sorted, Maintaining Index Associations
      *
-     * @param callable|null $callable
+     * @param int $flags
      * @return static
      */
-    public function asort(callable $callable = null): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function asort(int $flags = SORT_REGULAR): static
     {
         $data = $this->getArrayCopy();
-        if ($callable) {
-            uasort($data, $callable);
-        } else {
-            asort($data);
-        }
+        asort($data, $flags);
+        return $this->getNewInstance($data);
+    }
+
+    /**
+     * Get a New Collection With Contents Sorted, Maintaining Index Associations
+     *
+     * @param callable $callable
+     * @return static
+     */
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function uasort(callable $callable): static
+    {
+        $data = $this->getArrayCopy();
+        uasort($data, $callable);
         return $this->getNewInstance($data);
     }
 
@@ -407,7 +451,8 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param $seed int|null
      * @return static
      */
-    public function shuffle(int $seed = null): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    public function shuffle(int $seed = null): static
     {
         if ($seed !== null) {
             mt_srand($seed);
@@ -421,7 +466,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Join collection elements together with a string
      *
      * @param string $glue
-     * @param callable $callable
+     * @param callable|null $callable
      * @return string
      */
     public function implode($glue = '', callable $callable = null): string
@@ -439,7 +484,8 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param $data
      * @return static
      */
-    private function getNewInstance($data): self
+    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    private function getNewInstance($data): static
     {
         $reflection = new ReflectionClass($this);
         if ($reflection->isAnonymous()) {
@@ -454,13 +500,16 @@ class Collection extends ArrayObject implements JsonSerializable
      * Set the key and value types to enforce strict types within the collection
      *
      * @param mixed $data
-     * @param string $keyType
-     * @param string $valueType
+     * @param ?string $keyType
+     * @param ?string $valueType
      * @return self
      */
-    private static function getTypedCollection($data, string $keyType = null, string $valueType = null): Collection
-    {
-        $ret = new class ($data, $keyType, $valueType) extends Collection {
+    private static function getTypedCollection(
+        mixed $data,
+        ?string $keyType = null,
+        ?string $valueType = null,
+    ): Collection {
+        return new class ($data, $keyType, $valueType) extends Collection {
             public function __construct($data, $keyType, $valueType)
             {
                 $this->keyType = $keyType;
@@ -468,18 +517,17 @@ class Collection extends ArrayObject implements JsonSerializable
                 parent::__construct($data);
             }
         };
-
-        return $ret;
     }
 
     /**
-     * Get a New Anonymnous Typed Value Collection
+     * Get a New Anonymous Typed Value Collection
      *
      * @param string $valueType The type that all values must match
-     * @param array $data
+     * @param mixed $data
      * @return self
      */
-    public static function newTypedValueCollection(string $valueType, $data = []): Collection
+    // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
+    public static function newTypedValueCollection(string $valueType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, null, $valueType);
     }
@@ -488,10 +536,11 @@ class Collection extends ArrayObject implements JsonSerializable
      * Get a New Anonymous Typed Key Collection
      *
      * @param string $keyType The type that all keys must match
-     * @param array $data
+     * @param mixed $data
      * @return self
      */
-    public static function newTypedKeyCollection(string $keyType, $data = []): Collection
+    // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
+    public static function newTypedKeyCollection(string $keyType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, $keyType);
     }
@@ -499,37 +548,29 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Anonymous Typed Collection
      *
-     * @param string $keyType The type that all keys must match
-     * @param string $valueType The type that all values must match
-     * @param array $data
+     * @param ?string $keyType The type that all keys must match
+     * @param ?string $valueType The type that all values must match
+     * @param mixed $data
      * @return self
      */
-    public static function newTypedCollection(?string $keyType, ?string $valueType, $data = []): Collection
+    public static function newTypedCollection(?string $keyType, ?string $valueType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, $keyType, $valueType);
     }
 
     /**
      * Get a JSON Serializable Representation of this Collection
-     *
-     * @return array|mixed
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->getArrayCopy();
     }
 
-    /**
-     * @return bool
-     */
     public function isEmpty(): bool
     {
         return $this->count() === 0;
     }
 
-    /**
-     * @return bool
-     */
     public function isNotEmpty(): bool
     {
         return $this->count() > 0;

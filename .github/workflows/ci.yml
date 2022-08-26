@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest, windows-latest, macOS-latest]
-        php-versions: [ '7.2', '7.3', '7.4' ]
+        php-versions: [ '8.0', '8.1' ]
     name: PHP ${{ matrix.php-versions }} ${{ matrix.operating-system }}
     steps:
       - name: Git Configure
@@ -32,7 +32,7 @@ jobs:
       - name: PHPUnit
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
       - name: PHPCS
-        run: vendor/bin/phpcs --standard=psr2 src/ -n
+        run: vendor/bin/phpcs --standard=psr12 src/ -s
   coverage:
     name: Coverage Reports
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.0
           extensions: intl #optional
           ini-values: "post_max_size=256M" #optional
       - name: Prepare FS
