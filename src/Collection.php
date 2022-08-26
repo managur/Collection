@@ -233,7 +233,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @return static New collection of the same type
      */
     // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
-    public function slice(int $offset, int $length = null): static
+    public function slice(int $offset, ?int $length = null): static
     {
         return $this->getNewInstance(array_slice($this->getArrayCopy(), $offset, $length));
     }
@@ -259,7 +259,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed $carry Initial value, or returned if array is empty
      * @return mixed Type depends on return value of $callable
      */
-    public function reduce(callable $callable, $carry = null): mixed
+    public function reduce(callable $callable, mixed $carry = null): mixed
     {
         $array = $this->getArrayCopy();
         return array_reduce($array, $callable, $carry);
@@ -273,7 +273,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @return static
      */
     // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
-    public function filter($callable = null, int $flag = null): static
+    public function filter(?callable $callable = null, ?int $flag = null): static
     {
         $array = $this->getArrayCopy();
         if ($callable && is_callable($callable)) {
@@ -287,7 +287,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param ?callable(mixed $item, mixed $key):mixed $callable If provided will return the first value that this
      *   callback returns
-     * @param mixed If no result is found, return this instead
+     * @param mixed $default If no result is found, return this instead
      * @return mixed
      */
     public function first(?callable $callable = null, mixed $default = null): mixed
@@ -311,7 +311,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed|null If no result is found, return this instead
      * @return mixed
      */
-    public function last(callable $callable = null, $default = null): mixed
+    public function last(?callable $callable = null, mixed $default = null): mixed
     {
         if (is_callable($callable) === false) {
             $array = array_filter($this->getArrayCopy());
@@ -392,7 +392,7 @@ class Collection extends ArrayObject implements JsonSerializable
         if ($this->keyType) {
             asort($data, $flags);
         } else {
-            sort($data);
+            sort($data, $flags);
         }
         return $this->getNewInstance($data);
     }
@@ -506,8 +506,8 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     private static function getTypedCollection(
         mixed $data,
-        string $keyType = null,
-        string $valueType = null,
+        ?string $keyType = null,
+        ?string $valueType = null,
     ): Collection {
         return new class ($data, $keyType, $valueType) extends Collection {
             public function __construct($data, $keyType, $valueType)
