@@ -51,7 +51,7 @@ jobs:
       - name: Validate composer.json and composer.lock
         run: composer validate
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+        run: composer install --prefer-dist --no-progress --no-suggest --no-interaction --ignore-platform-reqs
       - name: PHPUnit
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
       - name: Coveralls
