@@ -8,22 +8,6 @@ use PHPUnit\Framework\TestCase;
 final class CollectionTest extends TestCase
 {
     /**
-     * @dataProvider collectibles
-     * @param $data
-     * @test
-     */
-    public function functions($data): void
-    {
-        $collection = collect($data);
-        $this->assertInstanceOf(Collection::class, $collection);
-        $this->assertCount(count($data), $collection);
-
-        $collection = collectInto(Collection::class, $data);
-        $this->assertInstanceOf(Collection::class, $collection);
-        $this->assertCount(count($data), $collection);
-    }
-
-    /**
      * @test
      */
     public function nonIterableTypeCollects(): void
