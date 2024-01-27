@@ -9,9 +9,6 @@
 
 use Managur\Collection\Collection;
 
-/**
- * @codeCoverageIgnore
- */
 if (!function_exists('collect')) {
     function collect(mixed $items): Collection
     {
@@ -19,9 +16,6 @@ if (!function_exists('collect')) {
     }
 }
 
-/**
- * @codeCoverageIgnore
- */
 if (!function_exists('collectInto')) {
     function collectInto(string $collectionType, mixed $items): Collection
     {
