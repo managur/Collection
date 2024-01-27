@@ -273,11 +273,11 @@ class Collection extends ArrayObject implements JsonSerializable
      * @return static
      */
     // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
-    public function filter(?callable $callable = null, ?int $flag = null): static
+    public function filter(?callable $callable = null, int $mode = 0): static
     {
         $array = $this->getArrayCopy();
         if ($callable && is_callable($callable)) {
-            return $this->getNewInstance(array_filter($array, $callable, $flag));
+            return $this->getNewInstance(array_filter($array, $callable, $mode));
         }
         return $this->getNewInstance(array_filter($array));
     }
