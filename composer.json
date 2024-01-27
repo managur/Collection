@@ -38,6 +38,7 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
+    "coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html docs",
     "cs": "vendor/bin/phpcs --standard=psr12 src/ -s",
     "cs-fix": "vendor/bin/phpcbf --standard=psr12 src/ -s"
   }
