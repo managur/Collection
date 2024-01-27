@@ -9,14 +9,14 @@
 
 use Managur\Collection\Collection;
 
-if (!function_exists('collect')) {
+if (!function_exists('collect')) { // @codeCoverageIgnore
     function collect(mixed $items): Collection
     {
         return new Collection($items);
     }
 }
 
-if (!function_exists('collectInto')) {
+if (!function_exists('collectInto')) { // @codeCoverageIgnore
     function collectInto(string $collectionType, mixed $items): Collection
     {
         return new $collectionType($items);
