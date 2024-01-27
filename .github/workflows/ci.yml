@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest, windows-latest, macOS-latest]
-        php-versions: [ '8.0', '8.1', '8.2' ]
+        php-versions: [ '8.0', '8.1', '8.2', '8.3' ]
     name: PHP ${{ matrix.php-versions }} ${{ matrix.operating-system }}
     steps:
       - name: Git Configure
@@ -16,7 +16,7 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -39,7 +39,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -61,7 +61,7 @@ jobs:
           composer global require php-coveralls/php-coveralls
           php-coveralls --coverage_clover=build/logs/clover.xml -v
       - name: CodeClimate
-        uses: paambaati/codeclimate-action@v2.7.5
+        uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
         with:

@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <phpunit bootstrap="vendor/autoload.php"
          colors="true"
          convertErrorsToExceptions="true"
@@ -5,15 +6,17 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
 >
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./src</directory>
-        </whitelist>
-    </filter>
-    <testsuites>
-        <testsuite name="CollectionTests">
-            <directory>tests</directory>
-        </testsuite>
-    </testsuites>
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">./src</directory>
+    </include>
+  </coverage>
+  <testsuites>
+    <testsuite name="CollectionTests">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>
