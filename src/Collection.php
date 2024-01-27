@@ -424,6 +424,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @return static
      */
     // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    #[\ReturnTypeWillChange]
     public function asort(int $flags = SORT_REGULAR): static
     {
         $data = $this->getArrayCopy();
@@ -438,6 +439,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @return static
      */
     // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
+    #[\ReturnTypeWillChange]
     public function uasort(callable $callable): static
     {
         $data = $this->getArrayCopy();
