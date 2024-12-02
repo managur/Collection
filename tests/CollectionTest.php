@@ -724,6 +724,28 @@ final class CollectionTest extends TestCase
         );
     }
 
+    /** @test */
+    public function itChunksTheCollection(): void
+    {
+        $collection = new Collection(['a', 'b', 'c', 'd', 'e']);
+        $chunks = $collection->chunk(2);
+
+        $expectedChunks = new Collection([[0 => 'a', 1 => 'b'], [2 => 'c', 3 => 'd'], [4 => 'e']]);
+
+        $this->assertEquals($expectedChunks, $chunks);
+    }
+
+    /** @test */
+    public function itReturnsTheArrayKeysOfTheCollection(): void
+    {
+        $collection = new Collection(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5]);
+        $keys = $collection->keys();
+
+        $expectedKeys = ['a', 'b', 'c', 'd', 'e'];
+
+        $this->assertEquals($expectedKeys, $keys);
+    }
+
 
 
 
