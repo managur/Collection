@@ -11,7 +11,7 @@
     "phpunit/phpunit": "^9.5"
   },
   "require": {
-    "php": "8.0 - 8.3"
+    "php": "8.0 - 8.4"
   },
   "license": "MIT",
   "authors": [
