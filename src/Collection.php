@@ -454,7 +454,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @return static
      */
     // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
-    public function shuffle(int $seed = null): static
+    public function shuffle(?int $seed = null): static
     {
         if ($seed !== null) {
             mt_srand($seed);
@@ -471,7 +471,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param callable|null $callable
      * @return string
      */
-    public function implode($glue = '', callable $callable = null): string
+    public function implode($glue = '', ?callable $callable = null): string
     {
         $array = $this->getArrayCopy();
         if ($callable) {
