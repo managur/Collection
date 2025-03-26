@@ -478,3 +478,20 @@ $joined = $collection->implode(', ', function (User $user): string {
     return $user->name();
 });
 ```
+
+### Chunk
+The `chunk()` method will take your collection and return it split into
+chunks (max size of `$limit`) and by default will preserve the keys
+```php
+$collection = new Collection(['a', 'b', 'c', 'd', 'e']);
+$chunks = $collection->chunk(2);
+// $chunks is now: new Collection([[0 => 'a', 1 => 'b'], [2 => 'c', 3 => 'd'], [4 => 'e']]);
+```
+
+### Keys
+The `keys()` method will take your collection and return the keys of each
+of the items within it
+```php
+$collection = new Collection(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5]);
+$keys = $collection->keys(); // ['a', 'b', 'c', 'd', 'e']
+```

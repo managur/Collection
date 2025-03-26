@@ -481,6 +481,28 @@ class Collection extends ArrayObject implements JsonSerializable
     }
 
     /**
+     * Chunks a collection into a new collection where each item contains max `$limit` number of items from the original
+     *
+     * @param int $limit
+     * @param bool $preserveKeys
+     * @return Collection
+     */
+    public function chunk(int $limit, bool $preserveKeys = true): self
+    {
+        return new Collection(array_chunk($this->getArrayCopy(), $limit, $preserveKeys));
+    }
+
+    /**
+     * Returns the keys of the collection
+     *
+     * @return array
+     */
+    public function keys(): array
+    {
+        return array_keys($this->getArrayCopy());
+    }
+
+    /**
      * Get a New Instance of the Same Type
      *
      * @param $data
