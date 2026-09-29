@@ -24,14 +24,13 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: intl #optional
           ini-values: "post_max_size=256M" #optional
-      - name: Prepare FS
-        run: mkdir -p build/logs
+          coverage: none
       - name: Validate composer.json and composer.lock
         run: composer validate
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest --no-interaction --ignore-platform-reqs
       - name: PHPUnit
-        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        run: vendor/bin/phpunit
       - name: PHPCS
         run: vendor/bin/phpcs --standard=psr12 src/ -s
       - name: PHPStan
@@ -49,6 +48,7 @@ jobs:
           php-version: 8.2
           extensions: intl #optional
           ini-values: "post_max_size=256M" #optional
+          coverage: xdebug
       - name: Prepare FS
         run: mkdir -p build/logs
       - name: Validate composer.json and composer.lock
