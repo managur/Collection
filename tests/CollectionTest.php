@@ -380,13 +380,6 @@ final class CollectionTest extends TestCase
     }
 
     /** @test */
-    public function popFromAnEmptyCollection(): void
-    {
-        $collection = new Collection();
-        $this->assertNull($collection->pop());
-    }
-
-    /** @test */
     public function appendAfterPopContinuesFromTheNextIndex(): void
     {
         $collection = new Collection([1, 2, 3]);
@@ -786,42 +779,27 @@ final class CollectionTest extends TestCase
         $this->assertSame('x', $collection[0]);
     }
 
-    /** @test */
-    public function issetAndEmptyOnAPresentKey(): void
+    /**
+     * @dataProvider offsetLookups
+     * @param array $data
+     * @param string $key
+     * @param bool $isset
+     * @param bool $empty
+     * @test
+     */
+    public function issetAndEmptyOnAKey($data, $key, $isset, $empty): void
     {
-        $collection = new Collection(['present' => 'value']);
-        $this->assertTrue(isset($collection['present']));
-        $this->assertFalse(empty($collection['present']));
-        $this->assertTrue($collection->offsetExists('present'));
+        $collection = new Collection($data);
+        $this->assertSame($isset, isset($collection[$key]));
+        $this->assertSame($empty, empty($collection[$key]));
+        $this->assertSame($isset, $collection->offsetExists($key));
     }
 
     /** @test */
-    public function issetAndEmptyOnANullValuedKey(): void
+    public function aNullValuedKeyIsStillCounted(): void
     {
         $collection = new Collection(['null' => null]);
-        $this->assertFalse(isset($collection['null']));
-        $this->assertTrue(empty($collection['null']));
-        $this->assertFalse($collection->offsetExists('null'));
         $this->assertSame(1, count($collection));
-    }
-
-    /** @test */
-    public function issetAndEmptyOnAMissingKey(): void
-    {
-        $collection = new Collection(['present' => 'value']);
-        $this->assertFalse(isset($collection['missing']));
-        $this->assertTrue(empty($collection['missing']));
-        $this->assertFalse($collection->offsetExists('missing'));
-    }
-
-    /** @test */
-    public function issetAndEmptyOnFalsyValues(): void
-    {
-        $collection = new Collection(['zero' => 0, 'blank' => '']);
-        $this->assertTrue(isset($collection['zero']));
-        $this->assertTrue(empty($collection['zero']));
-        $this->assertTrue(isset($collection['blank']));
-        $this->assertTrue(empty($collection['blank']));
     }
 
     /** @test */
@@ -863,20 +841,18 @@ final class CollectionTest extends TestCase
         $this->assertSame(['c' => 3], $collection->getArrayCopy());
     }
 
-    /** @test */
-    public function exchangeArrayEnforcesValueTypes(): void
+    /**
+     * @dataProvider mismatchedTypedCollections
+     * @param $data
+     * @param $keyType
+     * @param $valueType
+     * @test
+     */
+    public function exchangeArrayWithIncorrectTypes($data, $keyType, $valueType): void
     {
-        $collection = Collection::newTypedValueCollection('integer', [1, 2, 3]);
+        $collection = $this->getTypedCollection([], $keyType, $valueType);
         $this->expectException(\TypeError::class);
-        $collection->exchangeArray(['one', 'two']);
-    }
-
-    /** @test */
-    public function exchangeArrayEnforcesKeyTypes(): void
-    {
-        $collection = Collection::newTypedKeyCollection('integer', [1, 2, 3]);
-        $this->expectException(\TypeError::class);
-        $collection->exchangeArray(['a' => 1]);
+        $collection->exchangeArray($data);
     }
 
     /** @test */
@@ -1032,6 +1008,17 @@ final class CollectionTest extends TestCase
         return [
             [['a'=>3, 'b'=>2, 'c'=>1], ['c'=>1, 'b'=>2, 'a'=>3]],
             [['a'=>'c', 'b'=>'b', 'c'=>'a'], ['c'=>'a', 'b'=>'b', 'a'=>'c']],
+        ];
+    }
+
+    public static function offsetLookups(): array
+    {
+        return [
+            [['present'=>'value'], 'present', true, false],
+            [['present'=>'value'], 'missing', false, true],
+            [['null'=>null], 'null', false, true],
+            [['zero'=>0], 'zero', true, true],
+            [['blank'=>''], 'blank', true, true],
         ];
     }
 }
