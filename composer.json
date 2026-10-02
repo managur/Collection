@@ -7,11 +7,12 @@
   ],
   "homepage": "https://github.com/managur/Collection",
   "require-dev": {
-    "squizlabs/php_codesniffer": "^3.13",
-    "phpunit/phpunit": "^9.6"
+    "squizlabs/php_codesniffer": "^3.13.6",
+    "phpunit/phpunit": "^11.5.50",
+    "phpstan/phpstan": "^2.1"
   },
   "require": {
-    "php": "8.0 - 8.5"
+    "php": "8.2 - 8.6"
   },
   "license": "MIT",
   "authors": [
@@ -36,10 +37,16 @@
   "replace": {
     "antnee/collection": "*"
   },
+  "config": {
+    "platform": {
+      "php": "8.2.0"
+    }
+  },
   "scripts": {
     "test": "vendor/bin/phpunit",
     "coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html docs",
     "cs": "vendor/bin/phpcs --standard=psr12 src/ -s",
-    "cs-fix": "vendor/bin/phpcbf --standard=psr12 src/ -s"
+    "cs-fix": "vendor/bin/phpcbf --standard=psr12 src/ -s",
+    "stan": "vendor/bin/phpstan analyse"
   }
 }

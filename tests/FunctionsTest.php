@@ -23,14 +23,28 @@ final class FunctionsTest extends TestCase
         $this->assertCount(count($data), $collection);
     }
 
-    public function collectibles(): array
+    /** @test */
+    public function collectIntoANonCollectionTypeThrows(): void
+    {
+        $this->expectException(\TypeError::class);
+        collectInto(\stdClass::class, [1, 2, 3]);
+    }
+
+    /** @test */
+    public function collectIntoANonExistingTypeThrows(): void
+    {
+        $this->expectException(\TypeError::class);
+        collectInto('my arbitrary type', [1, 2, 3]);
+    }
+
+    public static function collectibles(): array
     {
         return [
             [[[],[],[],[]], null, 'array'],
             [[8,9,3,4,1,6,2,10,9,5,7], null, 'integer'],
             [['f','b','e','c','d','a'], 'integer', 'string'],
             [new Collection([4,3,5,1,2,6]), 'integer', null],
-            [new class implements \JsonSerializable, \Countable { public function count(){ return count($this->jsonSerialize()); } public function jsonSerialize(){ return ['a','b','c','d','e','f']; }}],
+            [new class implements \JsonSerializable, \Countable { public function count(): int { return count($this->jsonSerialize()); } public function jsonSerialize(): mixed { return ['a','b','c','d','e','f']; }}],
         ];
     }
 }

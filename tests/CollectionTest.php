@@ -266,7 +266,7 @@ final class CollectionTest extends TestCase
     {
         $collection = new Collection([1,2,3,4,5,6,7,8,9]);
         $last = $collection->last(fn ($value) => $value < 5);
-        $this->assertEquals($last, 4);
+        $this->assertSame(4, $last);
     }
 
     /**
@@ -277,7 +277,7 @@ final class CollectionTest extends TestCase
     public function containsValue($data): void
     {
         $collection = new Collection($data);
-        $data = (array)$data;
+        $data = $data instanceof Collection ? $data->getArrayCopy() : (array)$data;
         $randomValue = array_rand($data);
         $this->assertTrue($collection->contains($data[$randomValue]));
     }
@@ -285,10 +285,60 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function containsValueByCallback(): void
+    public function anyValueByCallback(): void
     {
         $collection = new Collection([1,2,3,4,5,6,7,8,9]);
-        $this->assertTrue($collection->contains(fn ($value) => $value === 4));
+        $this->assertTrue($collection->any(fn ($value) => $value === 4));
+        $this->assertFalse($collection->any(fn ($value) => $value === 10));
+    }
+
+    /** @test */
+    public function getFirstValueByCallbackMatchingAFalsyValue(): void
+    {
+        $collection = new Collection([0, 1, 2]);
+        $this->assertSame(0, $collection->first(fn ($value) => $value === 0));
+    }
+
+    /** @test */
+    public function getLastValueByCallbackOnATypedValueCollection(): void
+    {
+        $collection = Collection::newTypedValueCollection('integer', [1, 2, 3, 4]);
+        $this->assertSame(3, $collection->last(fn ($value) => $value < 4));
+    }
+
+    /** @test */
+    public function anyValueByCallbackMatchingAFalsyValue(): void
+    {
+        $collection = new Collection([1, 0, 2]);
+        $this->assertTrue($collection->any(fn ($value) => $value === 0));
+    }
+
+    /** @test */
+    public function anyPassesTheKeyToTheCallback(): void
+    {
+        $collection = new Collection(['a' => 1, 'b' => 2]);
+        $this->assertTrue($collection->any(fn ($value, $key) => $key === 'b'));
+    }
+
+    /** @test */
+    public function containsTreatsAStringAsAValueNotACallable(): void
+    {
+        $collection = new Collection(['apple']);
+        $this->assertFalse($collection->contains('count'));
+    }
+
+    /** @test */
+    public function containsTreatsACallableAsAValue(): void
+    {
+        $called = false;
+        $listener = function () use (&$called) {
+            $called = true;
+        };
+        $collection = new Collection([$listener, [self::class, 'collectibles']]);
+        $this->assertTrue($collection->contains($listener));
+        $this->assertTrue($collection->contains([self::class, 'collectibles']));
+        $this->assertFalse($collection->contains(fn () => true));
+        $this->assertFalse($called);
     }
 
     /**
@@ -319,6 +369,23 @@ final class CollectionTest extends TestCase
         $popped = $collection->pop();
         $this->assertEquals('foo', $popped);
         $this->assertCount(2, $collection);
+    }
+
+    /** @test */
+    public function popFromAKeyedCollection(): void
+    {
+        $collection = new Collection(['a' => 1, 'b' => 2]);
+        $this->assertSame(2, $collection->pop());
+        $this->assertSame(['a' => 1], $collection->getArrayCopy());
+    }
+
+    /** @test */
+    public function appendAfterPopContinuesFromTheNextIndex(): void
+    {
+        $collection = new Collection([1, 2, 3]);
+        $collection->pop();
+        $collection->append(4);
+        $this->assertSame([1, 2, 4], $collection->getArrayCopy());
     }
 
     /**
@@ -492,6 +559,17 @@ final class CollectionTest extends TestCase
         $shuffledArray = $shuffled->getArrayCopy();
         $this->assertNotEquals($shuffledArray, $data);
         $this->assertEquals($shuffledArray, $expected);
+    }
+
+    /** @test */
+    public function shuffleWithSeedDoesNotReseedTheGlobalRandomNumberGenerator(): void
+    {
+        $collection = new Collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        mt_srand(1);
+        $expected = mt_rand();
+        mt_srand(1);
+        $collection->shuffle(15);
+        $this->assertSame($expected, mt_rand());
     }
 
     /**
@@ -693,6 +771,124 @@ final class CollectionTest extends TestCase
     }
 
     /** @test */
+    public function appendWithEmptyOffsetAppendsTheValue(): void
+    {
+        $collection = new Collection(['a' => 1]);
+        $collection[] = 'x';
+        $this->assertSame(['a' => 1, 0 => 'x'], $collection->getArrayCopy());
+        $this->assertSame('x', $collection[0]);
+    }
+
+    /**
+     * @dataProvider offsetLookups
+     * @param array $data
+     * @param string $key
+     * @param bool $isset
+     * @param bool $empty
+     * @test
+     */
+    public function issetAndEmptyOnAKey($data, $key, $isset, $empty): void
+    {
+        $collection = new Collection($data);
+        $this->assertSame($isset, isset($collection[$key]));
+        $this->assertSame($empty, empty($collection[$key]));
+        $this->assertSame($isset, $collection->offsetExists($key));
+    }
+
+    /** @test */
+    public function aNullValuedKeyIsStillCounted(): void
+    {
+        $collection = new Collection(['null' => null]);
+        $this->assertSame(1, count($collection));
+    }
+
+    /** @test */
+    public function unsetRemovesTheKey(): void
+    {
+        $collection = new Collection(['a' => 1, 'b' => 2]);
+        unset($collection['a']);
+        $this->assertFalse(isset($collection['a']));
+        $this->assertSame(['b' => 2], $collection->getArrayCopy());
+    }
+
+    /** @test */
+    public function countReturnsTheNumberOfItems(): void
+    {
+        $collection = new Collection([1, 2, 3]);
+        $this->assertSame(3, $collection->count());
+        $this->assertSame(3, count($collection));
+        $collection->pop();
+        $this->assertSame(2, count($collection));
+    }
+
+    /** @test */
+    public function foreachIteratesInInsertionOrder(): void
+    {
+        $collection = new Collection(['c' => 3, 'a' => 1, 'b' => 2]);
+        $iterated = [];
+        foreach ($collection as $key => $value) {
+            $iterated[] = [$key, $value];
+        }
+        $this->assertSame([['c', 3], ['a', 1], ['b', 2]], $iterated);
+    }
+
+    /** @test */
+    public function exchangeArrayReturnsTheOldArray(): void
+    {
+        $collection = new Collection(['a' => 1, 'b' => 2]);
+        $old = $collection->exchangeArray(['c' => 3]);
+        $this->assertSame(['a' => 1, 'b' => 2], $old);
+        $this->assertSame(['c' => 3], $collection->getArrayCopy());
+    }
+
+    /**
+     * @dataProvider mismatchedTypedCollections
+     * @param $data
+     * @param $keyType
+     * @param $valueType
+     * @test
+     */
+    public function exchangeArrayWithIncorrectTypes($data, $keyType, $valueType): void
+    {
+        $collection = $this->getTypedCollection([], $keyType, $valueType);
+        $this->expectException(\TypeError::class);
+        $collection->exchangeArray($data);
+    }
+
+    /** @test */
+    public function appendEnforcesKeyTypes(): void
+    {
+        $collection = Collection::newTypedKeyCollection('string', ['a' => 1]);
+        $this->expectException(\TypeError::class);
+        $collection->append(2);
+    }
+
+    /** @test */
+    public function mergeIntoATypedKeyCollectionEnforcesKeyTypes(): void
+    {
+        $collection = Collection::newTypedKeyCollection('string', ['a' => 1]);
+        $this->expectException(\TypeError::class);
+        $collection->merge(new Collection([2]));
+    }
+
+    /** @test */
+    public function popFromAnEmptyCollectionLeavesItEmpty(): void
+    {
+        $collection = new Collection();
+        $this->assertNull($collection->pop());
+        $this->assertCount(0, $collection);
+        $this->assertTrue($collection->isEmpty());
+    }
+
+    /** @test */
+    public function jsonEncodeOutputsTheItems(): void
+    {
+        $this->assertSame('[1,2,3]', json_encode(new Collection([1, 2, 3])));
+        $this->assertSame('{"a":1,"b":[2]}', json_encode(new Collection(['a' => 1, 'b' => [2]])));
+        $this->assertSame('[]', json_encode(new Collection()));
+    }
+
+    /** @test */
     public function itImplodesStrings(): void
     {
         $collection = new Collection(['a', 'b']);
@@ -738,26 +934,26 @@ final class CollectionTest extends TestCase
      * @param string $valueType
      * @return Collection
      */
-    private function getTypedCollection($data, string $keyType=null, string $valueType=null): Collection
+    private function getTypedCollection($data, ?string $keyType=null, ?string $valueType=null): Collection
     {
         return Collection::newTypedCollection($keyType, $valueType, $data);
     }
 
-    public function collectibles(): array
+    public static function collectibles(): array
     {
         return [
             [[[],[],[],[]], null, 'array'],
             [[8,9,3,4,1,6,2,10,9,5,7], null, 'integer'],
             [['f','b','e','c','d','a'], 'integer', 'string'],
             [new Collection([4,3,5,1,2,6]), 'integer', null],
-            [new class implements \JsonSerializable, \Countable { public function count(){ return count($this->jsonSerialize()); } public function jsonSerialize(){ return ['a','b','c','d','e','f']; }}],
+            [new class implements \JsonSerializable, \Countable { public function count(): int { return count($this->jsonSerialize()); } public function jsonSerialize(): mixed { return ['a','b','c','d','e','f']; }}],
         ];
     }
 
-    public function iterables(): array
+    public static function iterables(): array
     {
         $ret = [];
-        foreach ($this->collectibles() as $case) {
+        foreach (self::collectibles() as $case) {
             if (is_iterable(current($case))) {
                 $ret[] = $case;
             }
@@ -765,10 +961,10 @@ final class CollectionTest extends TestCase
         return $ret;
     }
 
-    public function arrays(): array
+    public static function arrays(): array
     {
         $ret = [];
-        foreach ($this->collectibles() as $case) {
+        foreach (self::collectibles() as $case) {
             if (is_array(current($case))) {
                 $ret[] = $case;
             }
@@ -776,7 +972,7 @@ final class CollectionTest extends TestCase
         return $ret;
     }
 
-    public function mismatchedTypedCollections(): array
+    public static function mismatchedTypedCollections(): array
     {
         return [
             [[1,2,3,4,5,6,7,8,9,0], 'string', 'string'],
@@ -791,7 +987,7 @@ final class CollectionTest extends TestCase
         ];
     }
 
-    public function shuffles(): array
+    public static function shuffles(): array
     {
         return [
             [[1,2,3,4,5,6,7,8,9,10], 15, [9,10,2,1,7,6,8,5,4,3]],
@@ -799,7 +995,7 @@ final class CollectionTest extends TestCase
         ];
     }
 
-    public function sorts(): array
+    public static function sorts(): array
     {
         return [
             [[10,1,4,2,5,9,8,6,3,7], [1,2,3,4,5,6,7,8,9,10]],
@@ -807,11 +1003,22 @@ final class CollectionTest extends TestCase
         ];
     }
 
-    public function asorts(): array
+    public static function asorts(): array
     {
         return [
             [['a'=>3, 'b'=>2, 'c'=>1], ['c'=>1, 'b'=>2, 'a'=>3]],
             [['a'=>'c', 'b'=>'b', 'c'=>'a'], ['c'=>'a', 'b'=>'b', 'a'=>'c']],
+        ];
+    }
+
+    public static function offsetLookups(): array
+    {
+        return [
+            [['present'=>'value'], 'present', true, false],
+            [['present'=>'value'], 'missing', false, true],
+            [['null'=>null], 'null', false, true],
+            [['zero'=>0], 'zero', true, true],
+            [['blank'=>''], 'blank', true, true],
         ];
     }
 }
