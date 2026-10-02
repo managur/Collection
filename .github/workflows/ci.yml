@@ -17,7 +17,7 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -34,6 +34,7 @@ jobs:
       - name: PHPCS
         run: vendor/bin/phpcs --standard=psr12 src/ -s
       - name: PHPStan
+        if: matrix.operating-system == 'ubuntu-latest'
         run: vendor/bin/phpstan analyse
   coverage:
     name: Coverage Reports
@@ -41,7 +42,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
