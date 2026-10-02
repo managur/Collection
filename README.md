@@ -3,10 +3,18 @@
 [![Latest Stable Version](https://poser.pugx.org/managur/collection/v/stable)](https://packagist.org/packages/managur/collection)
 [![License](https://poser.pugx.org/managur/collection/license)](https://packagist.org/packages/managur/collection)
 [![Coverage Status](https://coveralls.io/repos/github/managur/Collection/badge.svg)](https://coveralls.io/github/managur/Collection)
-[![Maintainability](https://api.codeclimate.com/v1/badges/cf9fc22664d7eca42514/maintainability)](https://codeclimate.com/github/managur/Collection/maintainability)
 
 _Managur Collections_ is a library that provides a fully featured collection
 object to PHP.
+
+## End of Life for 1.x
+Version 1.15.0 is the final release of the 1.x branch, and no further 1.x
+releases or fixes are planned. Version 2.0 is coming soon. It will require PHP
+8.2 or later and will include breaking changes. An upgrade guide will be
+published alongside it.
+
+You're welcome to keep using 1.x, but we encourage you to start planning your
+upgrade.
 
 ## What are collections?
 Collections are similar to an array in PHP, but can be restricted to a specific
@@ -143,7 +151,7 @@ passing in `null` for the key (first argument) and/or the value (second
 argument) to get the specific combination that you require.
 
 ## Tests
-This library uses PHPUnit 7 to provide unit tests. To run the tests yourself,
+This library uses PHPUnit 9 to provide unit tests. To run the tests yourself,
 simply enter the following at a command line interface:
 ```sh
 $ composer test

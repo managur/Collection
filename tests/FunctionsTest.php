@@ -30,7 +30,7 @@ final class FunctionsTest extends TestCase
             [[8,9,3,4,1,6,2,10,9,5,7], null, 'integer'],
             [['f','b','e','c','d','a'], 'integer', 'string'],
             [new Collection([4,3,5,1,2,6]), 'integer', null],
-            [new class implements \JsonSerializable, \Countable { public function count(){ return count($this->jsonSerialize()); } public function jsonSerialize(){ return ['a','b','c','d','e','f']; }}],
+            [new class implements \JsonSerializable, \Countable { public function count(): int { return count($this->jsonSerialize()); } public function jsonSerialize(): mixed { return ['a','b','c','d','e','f']; }}],
         ];
     }
 }
