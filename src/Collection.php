@@ -21,6 +21,7 @@ use const SORT_REGULAR;
  *
  * @package Managur
  * @license MIT
+ * @extends ArrayObject<array-key, mixed>
  */
 class Collection extends ArrayObject implements JsonSerializable
 {
@@ -33,7 +34,6 @@ class Collection extends ArrayObject implements JsonSerializable
     /** @var string|null Enforce collection value type by defining type here */
     protected ?string $valueType = null;
 
-    // phpcs:ignore PSR12.Operators.OperatorSpacing -- Broken until 3.6.0
     public function __construct(mixed $items = [])
     {
         foreach ($this->arrayItems($items) as $key => $value) {
@@ -45,9 +45,8 @@ class Collection extends ArrayObject implements JsonSerializable
      * Prepare given items into array suitable for instantiation
      *
      * @param mixed $items
-     * @return array
+     * @return array<array-key, mixed>
      */
-    // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
     private function arrayItems(mixed $items): array
     {
         if (is_array($items)) {
@@ -171,7 +170,7 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Map collection into a new collection of a given type
      *
-     * @param callable $callable
+     * @param callable(mixed): mixed $callable
      * @param string $type
      * @return Collection
      */
@@ -184,7 +183,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Get a new collection of a given type
      *
      * @param string $type The collection type that you want an instance of
-     * @param array $items The items that you want to collect immediately (defaults to nothing)
+     * @param mixed $items The items that you want to collect immediately (defaults to nothing)
      * @return self
      */
     public static function newCollectionOfType(string $type, $items = []): Collection
@@ -204,10 +203,10 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Map Function Against Collection and Return New Collection
      *
-     * @param callable $callable May take up to two arguments: First is the array value, the second is the array key
+     * @param callable(mixed, array-key): mixed $callable May take up to two arguments: First is the array value, the
+     *                                                  second is the array key
      * @return static New collection of the same type
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     public function map(callable $callable): static
     {
         $array = $this->getArrayCopy();
@@ -232,7 +231,6 @@ class Collection extends ArrayObject implements JsonSerializable
      *                      array.
      * @return static New collection of the same type
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     public function slice(int $offset, ?int $length = null): static
     {
         return $this->getNewInstance(array_slice($this->getArrayCopy(), $offset, $length));
@@ -243,7 +241,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * Does not return; use map() for that
      *
-     * @param callable $callable
+     * @param callable(mixed, array-key): mixed $callable
      */
     public function each(callable $callable): void
     {
@@ -254,8 +252,8 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Reduce Collection by Callable
      *
-     * @param callable $callable Requires two arguments; the first to carry from the previous iteration, and the second
-     *                           as the item
+     * @param callable(mixed, mixed): mixed $callable Requires two arguments; the first to carry from the previous
+     *                                                iteration, and the second as the item
      * @param mixed $carry Initial value, or returned if array is empty
      * @return mixed Type depends on return value of $callable
      */
@@ -269,14 +267,13 @@ class Collection extends ArrayObject implements JsonSerializable
      * Filter Collection By Callable
      *
      * @param callable|null $callable Callback for each iteration. If null will just filter empty values from array
-     * @param int|null $flag Collection::FILTER_USE_KEY or Collection::FILTER_USE_BOTH
+     * @param int $mode Collection::FILTER_USE_KEY or Collection::FILTER_USE_BOTH
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     public function filter(?callable $callable = null, int $mode = 0): static
     {
         $array = $this->getArrayCopy();
-        if ($callable && is_callable($callable)) {
+        if ($callable !== null) {
             return $this->getNewInstance(array_filter($array, $callable, $mode));
         }
         return $this->getNewInstance(array_filter($array));
@@ -285,8 +282,8 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get First Entry From Collection
      *
-     * @param ?callable(mixed $item, mixed $key):mixed $callable If provided will return the first value that this
-     *   callback returns
+     * @param ?callable(mixed, array-key): mixed $callable If provided will return the first non-empty item for
+     *   which this callback returns a truthy value
      * @param mixed $default If no result is found, return this instead
      * @return mixed
      */
@@ -307,8 +304,9 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get Last Entry From Collection
      *
-     * @param callable|null $callable If provided will return the last value that this callback returns
-     * @param mixed|null If no result is found, return this instead
+     * @param ?callable(mixed, array-key): mixed $callable If provided will return the last non-empty value that this
+     *   callback returns
+     * @param mixed|null $default If no result is found, return this instead
      * @return mixed
      */
     public function last(?callable $callable = null, mixed $default = null): mixed
@@ -341,7 +339,7 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public function pop(): mixed
     {
-        $array  = $this->getArrayCopy();
+        $array  = $this->exchangeArray([]);
         $popped = array_pop($array);
         $this->exchangeArray($array);
         return $popped;
@@ -350,7 +348,7 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Push Entities On To The End Of The Collection
      *
-     * @param array ...$vals
+     * @param mixed ...$vals
      */
     public function push(...$vals): void
     {
@@ -367,7 +365,6 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param Collection $add
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     public function merge(Collection $add): static
     {
         $clone = clone($this);
@@ -385,7 +382,6 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param int $flags
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     public function sort(int $flags = SORT_REGULAR): static
     {
         $data = $this->getArrayCopy();
@@ -398,14 +394,13 @@ class Collection extends ArrayObject implements JsonSerializable
     }
 
     /**
-     *Get a New Collection With Contents Sorted By User Defined Callable
+     * Get a New Collection With Contents Sorted By User Defined Callable
      *
      * Functions the same as uasort() if index types are constrained
      *
-     * @param $callable
+     * @param callable(mixed, mixed): int $callable
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     public function usort(callable $callable): static
     {
         $data = $this->getArrayCopy();
@@ -423,7 +418,6 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param int $flags
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     #[\ReturnTypeWillChange]
     public function asort(int $flags = SORT_REGULAR): static
     {
@@ -435,10 +429,9 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Collection With Contents Sorted, Maintaining Index Associations
      *
-     * @param callable $callable
+     * @param callable(mixed, mixed): int $callable
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     #[\ReturnTypeWillChange]
     public function uasort(callable $callable): static
     {
@@ -450,10 +443,9 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Collection With Contents Shuffled
      *
-     * @param $seed int|null
+     * @param int|null $seed
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     public function shuffle(?int $seed = null): static
     {
         if ($seed !== null) {
@@ -468,7 +460,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Join collection elements together with a string
      *
      * @param string $glue
-     * @param callable|null $callable
+     * @param (callable(mixed, array-key): mixed)|null $callable
      * @return string
      */
     public function implode($glue = '', ?callable $callable = null): string
@@ -483,15 +475,24 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Instance of the Same Type
      *
-     * @param $data
+     * @param array<array-key, mixed> $data
      * @return static
      */
-    // phpcs:ignore Squiz.WhiteSpace.ScopeKeywordSpacing.Incorrect -- Broken until 3.6.0
     private function getNewInstance($data): static
     {
         $reflection = new ReflectionClass($this);
+        if ($reflection->isAnonymous() && $reflection->getFileName() === __FILE__) {
+            /** @var static $collection Our own typed collections are always the same anonymous class */
+            $collection = self::getTypedCollection($data, $this->keyType, $this->valueType);
+            return $collection;
+        }
         if ($reflection->isAnonymous()) {
-            return self::getTypedCollection($data, $this->keyType, $this->valueType);
+            $clone = clone($this);
+            $clone->exchangeArray([]);
+            foreach ($data as $key => $value) {
+                $clone->offsetSet($key, $value);
+            }
+            return $clone;
         }
         return new static($data);
     }
@@ -512,6 +513,11 @@ class Collection extends ArrayObject implements JsonSerializable
         ?string $valueType = null,
     ): Collection {
         return new class ($data, $keyType, $valueType) extends Collection {
+            /**
+             * @param mixed $data
+             * @param string|null $keyType
+             * @param string|null $valueType
+             */
             public function __construct($data, $keyType, $valueType)
             {
                 $this->keyType = $keyType;
@@ -528,7 +534,6 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed $data
      * @return self
      */
-    // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
     public static function newTypedValueCollection(string $valueType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, null, $valueType);
@@ -541,7 +546,6 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed $data
      * @return self
      */
-    // phpcs:ignore PSR12.Operators.OperatorSpacing.NoSpaceAfter, PSR12.Operators.OperatorSpacing.NoSpaceBefore -- Broken until 3.6.0
     public static function newTypedKeyCollection(string $keyType, mixed $data = []): Collection
     {
         return self::getTypedCollection($data, $keyType);
@@ -562,6 +566,8 @@ class Collection extends ArrayObject implements JsonSerializable
 
     /**
      * Get a JSON Serializable Representation of this Collection
+     *
+     * @return array<array-key, mixed>
      */
     public function jsonSerialize(): array
     {
