@@ -10,13 +10,13 @@ return `false`.**
 
 In 1.x, `contains()` would accept either a value to look for, or a callback to
 search with. It now only ever looks for a value, and searching with a callback
-has moved to the new `any()` method:
+has moved to the new `containsMatch()` method:
 ```php
 // 1.x
 $collection->contains(fn ($user) => $user->isAdmin());
 
 // 2.0
-$collection->any(fn ($user) => $user->isAdmin());
+$collection->containsMatch(fn ($user) => $user->isAdmin());
 ```
 Any callable that you pass to `contains()`, including closures, invokable
 objects and `[$object, 'method']` arrays, is now treated as a value to look for,
@@ -24,7 +24,7 @@ so you can now safely check whether a collection of callables contains a
 particular one.
 
 Search your code for `->contains(` and change any call that passes a callback
-to use `any()` instead.
+to use `containsMatch()` instead.
 
 ## Requirements
 PHP 8.2 or later is now required. PHP 8.0 and 8.1 are no longer supported. PHP

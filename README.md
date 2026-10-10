@@ -362,17 +362,18 @@ this is the method for you. Values are compared strictly, so `1` will not match
 $collection = new Collection([$alice, $bob]);
 $containsAlice = $collection->contains($alice);
 ```
-If you need to search with a callback instead, use `any()`.
+If you need to search with a callback instead, use `containsMatch()`.
 
-### Any
-`any()` takes a callback, providing you with a really flexible search operation
-where you can match on partial or computed data. The callback receives each
-value, followed by its key.
+### Contains Match
+`containsMatch()` takes a callback, providing you with a really flexible search
+operation where you can match on partial or computed data. The callback receives
+each value, followed by its key.
 
-`any()` returns a boolean value, so you can use this to check conditions.
+`containsMatch()` returns a boolean value, so you can use this to check
+conditions.
 ```php
 $collection = new Collection($arrayOfUserObjects);
-$containsAGmailUser = $collection->any(function ($user) {
+$containsAGmailUser = $collection->containsMatch(function ($user) {
     return false !== stripos($user->emailAddress(), '@gmail.');
 });
 ```

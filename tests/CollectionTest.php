@@ -286,11 +286,11 @@ final class CollectionTest extends TestCase
     /**
      * @test
      */
-    public function anyValueByCallback(): void
+    public function containsMatchByCallback(): void
     {
         $collection = new Collection([1,2,3,4,5,6,7,8,9]);
-        $this->assertTrue($collection->any(fn ($value) => $value === 4));
-        $this->assertFalse($collection->any(fn ($value) => $value === 10));
+        $this->assertTrue($collection->containsMatch(fn ($value) => $value === 4));
+        $this->assertFalse($collection->containsMatch(fn ($value) => $value === 10));
     }
 
     /** @test */
@@ -336,17 +336,17 @@ final class CollectionTest extends TestCase
     }
 
     /** @test */
-    public function anyValueByCallbackMatchingAFalsyValue(): void
+    public function containsMatchByCallbackMatchingAFalsyValue(): void
     {
         $collection = new Collection([1, 0, 2]);
-        $this->assertTrue($collection->any(fn ($value) => $value === 0));
+        $this->assertTrue($collection->containsMatch(fn ($value) => $value === 0));
     }
 
     /** @test */
-    public function anyPassesTheKeyToTheCallback(): void
+    public function containsMatchPassesTheKeyToTheCallback(): void
     {
         $collection = new Collection(['a' => 1, 'b' => 2]);
-        $this->assertTrue($collection->any(fn ($value, $key) => $key === 'b'));
+        $this->assertTrue($collection->containsMatch(fn ($value, $key) => $key === 'b'));
     }
 
     /** @test */

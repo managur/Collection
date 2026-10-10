@@ -457,7 +457,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     /**
      * Check if Collection Contains Value
      *
-     * Values are compared strictly. Use any() to search with a callback
+     * Values are compared strictly. Use containsMatch() to search with a callback
      *
      * @param TValue $value
      * @return bool
@@ -468,13 +468,13 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     }
 
     /**
-     * Check if Any Entry Matches Callable
+     * Check if Collection Contains an Entry Matching Callable
      *
      * @param callable(TValue, array-key): mixed $callable Takes the value and then the key. Return a truthy value to
      *   indicate a match
      * @return bool
      */
-    public function any(callable $callable): bool
+    public function containsMatch(callable $callable): bool
     {
         foreach ($this->items as $key => $item) {
             if ($callable($item, $key)) {
