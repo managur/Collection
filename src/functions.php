@@ -17,6 +17,13 @@ if (!function_exists('collect')) { // @codeCoverageIgnore
 }
 
 if (!function_exists('collectInto')) { // @codeCoverageIgnore
+    /**
+     * Collect Items Into A Specific Collection Type
+     *
+     * @param class-string<Collection> $collectionType
+     * @param mixed $items
+     * @return Collection
+     */
     function collectInto(string $collectionType, mixed $items): Collection
     {
         return new $collectionType($items);

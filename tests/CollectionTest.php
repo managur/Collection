@@ -321,6 +321,15 @@ final class CollectionTest extends TestCase
         $this->assertCount(2, $collection);
     }
 
+    /** @test */
+    public function appendAfterPopReusesThePoppedIndex(): void
+    {
+        $collection = new Collection([1, 2, 3]);
+        $this->assertSame(3, $collection->pop());
+        $collection->append(4);
+        $this->assertSame([1, 2, 4], $collection->getArrayCopy());
+    }
+
     /**
      * @test
      */
@@ -728,17 +737,39 @@ final class CollectionTest extends TestCase
 
 
 
+    /** @test */
+    public function anonymousSubclassesReturnTheirOwnType(): void
+    {
+        $collection = new class ([3, 1, 2]) extends Collection {
+        };
+
+        $this->assertSame(get_class($collection), get_class($collection->sort()));
+        $this->assertSame(get_class($collection), get_class($collection->map(fn ($value) => $value * 2)));
+        $this->assertSame(get_class($collection), get_class($collection->filter(fn ($value) => $value > 1)));
+        $this->assertSame([1, 2, 3], $collection->sort()->getArrayCopy());
+    }
+
+    /** @test */
+    public function sortedTypedValueCollectionStillEnforcesItsType(): void
+    {
+        $collection = Collection::newTypedValueCollection('integer', [3, 1, 2]);
+        $sorted = $collection->sort();
+
+        $this->expectException(\TypeError::class);
+        $sorted->append('a string');
+    }
+
     /**
      * Get a Strict Typed Collection
      *
      * Set the key and value types to enforce strict types within the collection
      *
      * @param mixed $data
-     * @param string $keyType
-     * @param string $valueType
+     * @param string|null $keyType
+     * @param string|null $valueType
      * @return Collection
      */
-    private function getTypedCollection($data, string $keyType=null, string $valueType=null): Collection
+    private function getTypedCollection($data, ?string $keyType=null, ?string $valueType=null): Collection
     {
         return Collection::newTypedCollection($keyType, $valueType, $data);
     }
@@ -750,7 +781,7 @@ final class CollectionTest extends TestCase
             [[8,9,3,4,1,6,2,10,9,5,7], null, 'integer'],
             [['f','b','e','c','d','a'], 'integer', 'string'],
             [new Collection([4,3,5,1,2,6]), 'integer', null],
-            [new class implements \JsonSerializable, \Countable { public function count(){ return count($this->jsonSerialize()); } public function jsonSerialize(){ return ['a','b','c','d','e','f']; }}],
+            [new class implements \JsonSerializable, \Countable { public function count(): int { return count($this->jsonSerialize()); } public function jsonSerialize(): mixed { return ['a','b','c','d','e','f']; }}],
         ];
     }
 

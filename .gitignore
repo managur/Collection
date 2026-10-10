@@ -1,3 +1,4 @@
 /phpcs-cache.json
 /vendor/
 /.idea
+/.phpunit.result.cache

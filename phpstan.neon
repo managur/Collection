@@ -1,0 +1,8 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    ignoreErrors:
+        -
+            identifier: new.static
+            path: src/Collection.php
