@@ -120,3 +120,23 @@ class UserCollection extends Collection
     protected ?string $valueType = User::class;
 }
 ```
+
+Methods that used to be seen as returning `mixed` now return precise types.
+Most importantly, `first()`, `last()` and `pop()` can all return `null`, and
+your tools will now tell you so. Checking `isEmpty()` beforehand is not enough
+to rule this out. Without a callback, `first()` and `last()` skip empty values,
+so a collection of `[0, '', null]` is not empty but has no first value, and with
+a callback there may simply be no match:
+```php
+// 1.x: passed static analysis, but $user could still be null
+if ($users->isEmpty()) {
+    throw new NoUsersException();
+}
+$user = $users->first();
+
+// 2.0
+$user = $users->first() ?? throw new NoUsersException();
+```
+If you would rather have an exception than a `null`, use the new
+`firstOrFail()` method, which returns a value or throws an
+`ItemNotFoundException`.

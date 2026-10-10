@@ -3,6 +3,7 @@
 namespace tests;
 
 use Managur\Collection\Collection;
+use Managur\Collection\ItemNotFoundException;
 use PHPUnit\Framework\TestCase;
 
 final class CollectionTest extends TestCase
@@ -297,6 +298,34 @@ final class CollectionTest extends TestCase
     {
         $collection = new Collection([0, 1, 2]);
         $this->assertSame(0, $collection->first(fn ($value) => $value === 0));
+    }
+
+    /** @test */
+    public function getFirstValueOrFail(): void
+    {
+        $collection = new Collection([0, 1, 2]);
+        $this->assertSame(1, $collection->firstOrFail());
+        $this->assertSame(2, $collection->firstOrFail(fn ($value) => $value > 1));
+    }
+
+    /** @test */
+    public function getFirstValueOrFailByCallbackMatchingANullValue(): void
+    {
+        $collection = new Collection([1, null, 2]);
+        $this->assertNull($collection->firstOrFail(fn ($value) => $value === null));
+    }
+
+    /**
+     * @dataProvider firstOrFailFailures
+     * @param array $data
+     * @param callable|null $callable
+     * @test
+     */
+    public function getFirstValueOrFailThrowsWhenNothingIsFound($data, $callable): void
+    {
+        $collection = new Collection($data);
+        $this->expectException(ItemNotFoundException::class);
+        $collection->firstOrFail($callable);
     }
 
     /** @test */
@@ -1008,6 +1037,15 @@ final class CollectionTest extends TestCase
         return [
             [['a'=>3, 'b'=>2, 'c'=>1], ['c'=>1, 'b'=>2, 'a'=>3]],
             [['a'=>'c', 'b'=>'b', 'c'=>'a'], ['c'=>'a', 'b'=>'b', 'a'=>'c']],
+        ];
+    }
+
+    public static function firstOrFailFailures(): array
+    {
+        return [
+            [[], null],
+            [[0, '', null], null],
+            [[1, 2, 3], fn ($value) => $value > 3],
         ];
     }
 

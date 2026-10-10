@@ -410,6 +410,29 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     }
 
     /**
+     * Get First Entry From Collection or Throw
+     *
+     * Works the same as first(), but throws instead of returning a default when no entry is found
+     *
+     * @param (callable(TValue, array-key): mixed)|null $callable If provided will return the first value that this
+     *   callback returns
+     * @return TValue
+     * @throws ItemNotFoundException
+     */
+    public function firstOrFail(?callable $callable = null): mixed
+    {
+        if ($callable === null) {
+            $callable = static fn ($item, $key) => $item;
+        }
+        foreach ($this->items as $key => $item) {
+            if ($callable($item, $key)) {
+                return $item;
+            }
+        }
+        throw new ItemNotFoundException('No matching entry found in collection');
+    }
+
+    /**
      * Get Last Entry From Collection
      *
      * @template TDefault

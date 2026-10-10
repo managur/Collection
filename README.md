@@ -328,6 +328,19 @@ $firstGmailUser = $collection->first(function ($user) {
     return false !== stripos($user->emailAddress(), '@gmail.');
 });
 ```
+If nothing is found then `first()` will return `null`, or the default value
+that you pass as its second argument.
+
+### First Or Fail
+`firstOrFail()` works exactly like `first()`, except that if nothing is found
+it will throw an `ItemNotFoundException` rather than returning a default value.
+This means that it will always give you a value back:
+```php
+$collection = new Collection($arrayOfUserObjects);
+$firstGmailUser = $collection->firstOrFail(function ($user) {
+    return false !== stripos($user->emailAddress(), '@gmail.');
+});
+```
 
 ### Last
 `last()` is exactly the same as `first()`, with the (hopefully obvious)
