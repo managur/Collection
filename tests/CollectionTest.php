@@ -953,14 +953,36 @@ final class CollectionTest extends TestCase
 
 
 
+    /** @test */
+    public function anonymousSubclassesReturnTheirOwnType(): void
+    {
+        $collection = new class ([3, 1, 2]) extends Collection {
+        };
+
+        $this->assertSame(get_class($collection), get_class($collection->sort()));
+        $this->assertSame(get_class($collection), get_class($collection->map(fn ($value) => $value * 2)));
+        $this->assertSame(get_class($collection), get_class($collection->filter(fn ($value) => $value > 1)));
+        $this->assertSame([1, 2, 3], $collection->sort()->getArrayCopy());
+    }
+
+    /** @test */
+    public function sortedTypedValueCollectionStillEnforcesItsType(): void
+    {
+        $collection = Collection::newTypedValueCollection('integer', [3, 1, 2]);
+        $sorted = $collection->sort();
+
+        $this->expectException(\TypeError::class);
+        $sorted->append('a string');
+    }
+
     /**
      * Get a Strict Typed Collection
      *
      * Set the key and value types to enforce strict types within the collection
      *
      * @param mixed $data
-     * @param string $keyType
-     * @param string $valueType
+     * @param string|null $keyType
+     * @param string|null $valueType
      * @return Collection
      */
     private function getTypedCollection($data, ?string $keyType=null, ?string $valueType=null): Collection

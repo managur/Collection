@@ -277,7 +277,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     /**
      * Map collection into a new collection of a given type
      *
-     * @param callable $callable
+     * @param callable(TValue): mixed $callable
      * @param string $type
      * @return Collection<array-key, mixed>
      */
