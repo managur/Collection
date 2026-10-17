@@ -10,6 +10,12 @@
 use Managur\Collection\Collection;
 
 if (!function_exists('collect')) { // @codeCoverageIgnore
+    /**
+     * Collect Items Into A Collection
+     *
+     * @param mixed $items
+     * @return Collection<array-key, mixed>
+     */
     function collect(mixed $items): Collection
     {
         return new Collection($items);
@@ -20,12 +26,12 @@ if (!function_exists('collectInto')) { // @codeCoverageIgnore
     /**
      * Collect Items Into A Specific Collection Type
      *
-     * @param class-string<Collection> $collectionType
+     * @param class-string<Collection<array-key, mixed>> $collectionType
      * @param mixed $items
-     * @return Collection
+     * @return Collection<array-key, mixed>
      */
     function collectInto(string $collectionType, mixed $items): Collection
     {
-        return new $collectionType($items);
+        return Collection::newCollectionOfType($collectionType, $items);
     }
 }

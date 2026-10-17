@@ -23,7 +23,21 @@ final class FunctionsTest extends TestCase
         $this->assertCount(count($data), $collection);
     }
 
-    public function collectibles(): array
+    /** @test */
+    public function collectIntoANonCollectionTypeThrows(): void
+    {
+        $this->expectException(\TypeError::class);
+        collectInto(\stdClass::class, [1, 2, 3]);
+    }
+
+    /** @test */
+    public function collectIntoANonExistingTypeThrows(): void
+    {
+        $this->expectException(\TypeError::class);
+        collectInto('my arbitrary type', [1, 2, 3]);
+    }
+
+    public static function collectibles(): array
     {
         return [
             [[[],[],[],[]], null, 'array'],
