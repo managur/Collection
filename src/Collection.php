@@ -391,8 +391,8 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      * Get First Entry From Collection
      *
      * @template TDefault
-     * @param (callable(TValue, array-key): mixed)|null $callable If provided will return the first value that this
-     *   callback returns
+     * @param (callable(TValue, array-key): mixed)|null $callable If provided will return the first value for which
+     *   this callback returns a truthy value
      * @param TDefault $default If no result is found, return this instead
      * @return TValue|TDefault
      */
@@ -414,8 +414,8 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      *
      * Works the same as first(), but throws instead of returning a default when no entry is found
      *
-     * @param (callable(TValue, array-key): mixed)|null $callable If provided will return the first value that this
-     *   callback returns
+     * @param (callable(TValue, array-key): mixed)|null $callable If provided will return the first value for which
+     *   this callback returns a truthy value
      * @return TValue
      * @throws ItemNotFoundException
      */
@@ -436,8 +436,8 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      * Get Last Entry From Collection
      *
      * @template TDefault
-     * @param (callable(TValue, TKey): mixed)|null $callable If provided will return the last value that this callback
-     *   returns
+     * @param (callable(TValue, TKey): mixed)|null $callable If provided will return the last value for which this
+     *   callback returns a truthy value
      * @param TDefault $default If no result is found, return this instead
      * @return TValue|TDefault
      */
