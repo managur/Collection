@@ -7,15 +7,6 @@
 _Managur Collections_ is a library that provides a fully featured collection
 object to PHP.
 
-## End of Life for 1.x
-Version 1.15.0 is the final release of the 1.x branch, and no further 1.x
-releases or fixes are planned. Version 2.0 is coming soon. It will require PHP
-8.2 or later and will include breaking changes. An upgrade guide will be
-published alongside it.
-
-You're welcome to keep using 1.x, but we encourage you to start planning your
-upgrade.
-
 ## What are collections?
 Collections are similar to an array in PHP, but can be restricted to a specific
 type, both at the index and value level.
@@ -151,7 +142,7 @@ passing in `null` for the key (first argument) and/or the value (second
 argument) to get the specific combination that you require.
 
 ## Tests
-This library uses PHPUnit 9 to provide unit tests. To run the tests yourself,
+This library uses PHPUnit 11 to provide unit tests. To run the tests yourself,
 simply enter the following at a command line interface:
 ```sh
 $ composer test
@@ -337,6 +328,19 @@ $firstGmailUser = $collection->first(function ($user) {
     return false !== stripos($user->emailAddress(), '@gmail.');
 });
 ```
+If nothing is found then `first()` will return `null`, or the default value
+that you pass as its second argument.
+
+### First Or Fail
+`firstOrFail()` works exactly like `first()`, except that if nothing is found
+it will throw an `ItemNotFoundException` rather than returning a default value.
+This means that it will always give you a value back:
+```php
+$collection = new Collection($arrayOfUserObjects);
+$firstGmailUser = $collection->firstOrFail(function ($user) {
+    return false !== stripos($user->emailAddress(), '@gmail.');
+});
+```
 
 ### Last
 `last()` is exactly the same as `first()`, with the (hopefully obvious)
@@ -350,14 +354,26 @@ $lastGmailUser = $collection->last(function ($user) {
 
 ### Contains
 If you need to check whether a specific value exists within your collection,
-this is the method for you. You can also search with a callback, providing you
-with a really flexible search operation where you can match on partial or
-computed data.
+this is the method for you. Values are compared strictly, so `1` will not match
+`'1'`, and objects will only match if they are the same instance.
 
 `contains()` returns a boolean value, so you can use this to check conditions.
 ```php
+$collection = new Collection([$alice, $bob]);
+$containsAlice = $collection->contains($alice);
+```
+If you need to search with a callback instead, use `containsMatch()`.
+
+### Contains Match
+`containsMatch()` takes a callback, providing you with a really flexible search
+operation where you can match on partial or computed data. The callback receives
+each value, followed by its key.
+
+`containsMatch()` returns a boolean value, so you can use this to check
+conditions.
+```php
 $collection = new Collection($arrayOfUserObjects);
-$containsAGmailUser = $collection->contains(function ($user) {
+$containsAGmailUser = $collection->containsMatch(function ($user) {
     return false !== stripos($user->emailAddress(), '@gmail.');
 });
 ```
@@ -423,8 +439,8 @@ $collection = collectInto(IntegerCollection::class, [1,2,3,4,5]);
 ### Sort
 If you need to sort your collection data, this is the method for you.
 
-`sort()` will accept a callable if you wish to use a user-defined sorting
-algorithm, or you can call it with no arguments.
+`sort()` will accept optional sort flags, and `usort()` will accept a callable
+if you wish to use a user-defined sorting algorithm.
 
 This is analogous to using the `sort()` and `usort()` functions with a simple
 array.
@@ -435,25 +451,25 @@ each value, similar to calling `asort()` or `uasort()` on a normal array.
 ```php
 $collection = new Collection([5,2,6,4,7,1]);
 $sorted = $collection->sort();
-$alsoSorted = $collection->sort(function ($a, $b) {
+$alsoSorted = $collection->usort(function ($a, $b) {
     return $a <=> $b;
 });
 ```
 This method will return a copy of the collection with the sorting applied.
 
 ### ASort
-Similar to `sort()`, the `asort()` method optionally accepts a callback to sort
-by a custom algorithm. The only difference between `sort()` and `asort()` is
-that index associations are maintained, regardless of whether the collection
-key type is constrained or not.
+Similar to `sort()` and `usort()`, the `asort()` method optionally accepts sort
+flags, and `uasort()` accepts a callable to sort by a custom algorithm. The only
+difference is that index associations are maintained, regardless of whether the
+collection key type is constrained or not.
 ```php
-$collection = new Collection([5,2,6,4,7,1]);
+$collection = new Collection(['a' => 5, 'b' => 2, 'c' => 6]);
 $sorted = $collection->asort();
-$alsoSorted = $collection->asort(function ($a, $b) {
+$alsoSorted = $collection->uasort(function ($a, $b) {
     return $a <=> $b;
 });
 ```
-This method will return a copy of the collection with the sorting applied.
+These methods will return a copy of the collection with the sorting applied.
 
 ### Shuffle
 The `shuffle()` method will take your values, shuffle them randomly, and then
@@ -463,8 +479,9 @@ $collection = new Collection([1,2,3,4,5]);
 $shuffled = $collection->shuffle();
 ```
 `shuffle()` also takes an optional integer _seed_, which will be used to
-determine the start state of the pseudo random number generator (`mt_rand()`)
-that is used to determine the order that elements are shuffled into.
+determine the start state of the seeded `Mt19937` engine, used via
+`Random\Randomizer`, that determines the order that elements are shuffled into.
+This no longer affects the global `mt_rand()` state.
 
 If you use the _seed_ with `shuffle()`, the resulting collection will always
 have its elements in the same order for a given original collection and seed

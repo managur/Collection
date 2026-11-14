@@ -2,10 +2,14 @@
 
 namespace Managur\Collection;
 
-use ArrayObject;
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use Iterator;
+use IteratorAggregate;
 use JsonSerializable;
-use ReflectionClass;
-use Traversable;
+use Random\Engine\Mt19937;
+use Random\Randomizer;
 use TypeError;
 
 use function gettype;
@@ -21,9 +25,13 @@ use const SORT_REGULAR;
  *
  * @package Managur
  * @license MIT
- * @extends ArrayObject<array-key, mixed>
+ *
+ * @template TKey of array-key
+ * @template TValue
+ * @implements ArrayAccess<TKey, TValue>
+ * @implements IteratorAggregate<TKey, TValue>
  */
-class Collection extends ArrayObject implements JsonSerializable
+class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
 {
     public const FILTER_USE_KEY = ARRAY_FILTER_USE_KEY;
     public const FILTER_USE_BOTH = ARRAY_FILTER_USE_BOTH;
@@ -34,9 +42,23 @@ class Collection extends ArrayObject implements JsonSerializable
     /** @var string|null Enforce collection value type by defining type here */
     protected ?string $valueType = null;
 
+    /** @var array<array-key, TValue> Items held in the collection */
+    private array $items = [];
+
     public function __construct(mixed $items = [])
     {
-        foreach ($this->arrayItems($items) as $key => $value) {
+        $this->fill($this->arrayItems($items));
+    }
+
+    /**
+     * Add Each Item Through offsetSet(), Applying The keyStrategy and Type Checks
+     *
+     * @param array<array-key, mixed> $items
+     * @throws TypeError
+     */
+    private function fill(array $items): void
+    {
+        foreach ($items as $key => $value) {
             $this->offsetSet($key, $value);
         }
     }
@@ -45,7 +67,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Prepare given items into array suitable for instantiation
      *
      * @param mixed $items
-     * @return array<array-key, mixed>
+     * @return array<TKey, TValue>
      */
     private function arrayItems(mixed $items): array
     {
@@ -95,15 +117,38 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public function append(mixed $value): void
     {
-        $key = $this->keyStrategy($value);
-        if ($key !== null) {
-            $this->offsetSet($key, $value);
-        } else {
-            parent::append($this->checkType($value, $this->valueType));
-        }
+        $this->offsetSet(null, $value);
     }
 
     /**
+     * Check if Offset Exists
+     *
+     * Like isset(), a key holding a null value is treated as not existing
+     *
+     * @param mixed $key
+     * @return bool
+     */
+    public function offsetExists(mixed $key): bool
+    {
+        return isset($this->items[$key]);
+    }
+
+    /**
+     * Get Value At Offset
+     *
+     * @param mixed $key
+     * @return TValue
+     */
+    public function offsetGet(mixed $key): mixed
+    {
+        return $this->items[$key];
+    }
+
+    /**
+     * Set Value At Offset
+     *
+     * If the key is null (after applying the keyStrategy) the value is appended
+     *
      * @param mixed $key
      * @param mixed $value
      */
@@ -115,10 +160,71 @@ class Collection extends ArrayObject implements JsonSerializable
             $key = $newKey;
         }
 
-        parent::offsetSet(
-            $this->checkType($key, $this->keyType),
-            $this->checkType($value, $this->valueType)
-        );
+        $key = $this->checkType($key, $this->keyType);
+        $value = $this->checkType($value, $this->valueType);
+
+        if ($key === null) {
+            $this->items[] = $value;
+        } else {
+            $this->items[$key] = $value;
+        }
+    }
+
+    /**
+     * Remove Value At Offset
+     *
+     * @param mixed $key
+     */
+    public function offsetUnset(mixed $key): void
+    {
+        unset($this->items[$key]);
+    }
+
+    /**
+     * Count Items In The Collection
+     *
+     * @return int
+     */
+    public function count(): int
+    {
+        return count($this->items);
+    }
+
+    /**
+     * Get an Iterator Over The Collection
+     *
+     * @return Iterator<TKey, TValue>
+     */
+    public function getIterator(): Iterator
+    {
+        return new ArrayIterator($this->items);
+    }
+
+    /**
+     * Get a Copy of The Items as an Array
+     *
+     * @return array<TKey, TValue>
+     */
+    public function getArrayCopy(): array
+    {
+        return $this->items;
+    }
+
+    /**
+     * Replace The Contents of The Collection
+     *
+     * The new items are checked against the key and value types, and the keyStrategy is applied, exactly as they are on
+     * construction. If any item is rejected, the collection is left unchanged.
+     *
+     * @param mixed $items
+     * @return array<TKey, TValue> The previous contents of the collection
+     * @throws TypeError
+     */
+    public function exchangeArray(mixed $items): array
+    {
+        $old = $this->items;
+        $this->items = $this->getNewInstance($this->arrayItems($items))->items;
+        return $old;
     }
 
     /**
@@ -127,9 +233,10 @@ class Collection extends ArrayObject implements JsonSerializable
      * If $type is not null, check that the provided value is the correct type. Throw a TypeError if not, and return the
      * value if it is.
      *
-     * @param mixed $value
+     * @template TChecked
+     * @param TChecked $value
      * @param string|null $expectedType
-     * @return mixed
+     * @return TChecked
      * @throws TypeError
      */
     private function checkType(mixed $value, ?string $expectedType): mixed
@@ -159,7 +266,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * Copy entries into a new collection
      *
      * @param string $type The collection type to copy into
-     * @return self
+     * @return Collection<array-key, mixed>
      * @throws TypeError
      */
     public function into(string $type): Collection
@@ -170,9 +277,9 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Map collection into a new collection of a given type
      *
-     * @param callable(mixed): mixed $callable
+     * @param callable(TValue): mixed $callable
      * @param string $type
-     * @return Collection
+     * @return Collection<array-key, mixed>
      */
     public function mapInto(callable $callable, string $type): self
     {
@@ -184,9 +291,9 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param string $type The collection type that you want an instance of
      * @param mixed $items The items that you want to collect immediately (defaults to nothing)
-     * @return self
+     * @return Collection<array-key, mixed>
      */
-    public static function newCollectionOfType(string $type, $items = []): Collection
+    public static function newCollectionOfType(string $type, mixed $items = []): Collection
     {
         if (class_exists($type) === false) {
             throw new TypeError(sprintf('Unknown class name "%s"', $type));
@@ -203,8 +310,8 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Map Function Against Collection and Return New Collection
      *
-     * @param callable(mixed, array-key): mixed $callable May take up to two arguments: First is the array value, the
-     *                                                  second is the array key
+     * @param callable(TValue, TKey): mixed $callable May take up to two arguments: First is the array value, the second
+     *                                                is the array key
      * @return static New collection of the same type
      */
     public function map(callable $callable): static
@@ -241,7 +348,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * Does not return; use map() for that
      *
-     * @param callable(mixed, array-key): mixed $callable
+     * @param callable(TValue, TKey): mixed $callable
      */
     public function each(callable $callable): void
     {
@@ -252,8 +359,8 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Reduce Collection by Callable
      *
-     * @param callable(mixed, mixed): mixed $callable Requires two arguments; the first to carry from the previous
-     *                                                iteration, and the second as the item
+     * @param callable(mixed, TValue): mixed $callable Requires two arguments; the first to carry from the previous
+     *                                                 iteration, and the second as the item
      * @param mixed $carry Initial value, or returned if array is empty
      * @return mixed Type depends on return value of $callable
      */
@@ -266,7 +373,8 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Filter Collection By Callable
      *
-     * @param callable|null $callable Callback for each iteration. If null will just filter empty values from array
+     * @param (callable(TValue, TKey=): mixed)|null $callable Callback for each iteration. If null will just filter
+     *                                                       empty values from array
      * @param int $mode Collection::FILTER_USE_KEY or Collection::FILTER_USE_BOTH
      * @return static
      */
@@ -282,18 +390,18 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get First Entry From Collection
      *
-     * @param ?callable(mixed, array-key): mixed $callable If provided will return the first non-empty item for
-     *   which this callback returns a truthy value
-     * @param mixed $default If no result is found, return this instead
-     * @return mixed
+     * @template TDefault
+     * @param (callable(TValue, array-key): mixed)|null $callable If provided will return the first value for which
+     *   this callback returns a truthy value
+     * @param TDefault $default If no result is found, return this instead
+     * @return TValue|TDefault
      */
     public function first(?callable $callable = null, mixed $default = null): mixed
     {
-        if (is_callable($callable) === false) {
+        if ($callable === null) {
             $callable = static fn ($item, $key) => $item;
         }
-        $data = array_filter($this->getArrayCopy());
-        foreach ($data as $key => $item) {
+        foreach ($this->items as $key => $item) {
             if ($callable($item, $key)) {
                 return $item;
             }
@@ -302,47 +410,88 @@ class Collection extends ArrayObject implements JsonSerializable
     }
 
     /**
+     * Get First Entry From Collection or Throw
+     *
+     * Works the same as first(), but throws instead of returning a default when no entry is found
+     *
+     * @param (callable(TValue, array-key): mixed)|null $callable If provided will return the first value for which
+     *   this callback returns a truthy value
+     * @return TValue
+     * @throws ItemNotFoundException
+     */
+    public function firstOrFail(?callable $callable = null): mixed
+    {
+        if ($callable === null) {
+            $callable = static fn ($item, $key) => $item;
+        }
+        foreach ($this->items as $key => $item) {
+            if ($callable($item, $key)) {
+                return $item;
+            }
+        }
+        throw new ItemNotFoundException('No matching entry found in collection');
+    }
+
+    /**
      * Get Last Entry From Collection
      *
-     * @param ?callable(mixed, array-key): mixed $callable If provided will return the last non-empty value that this
-     *   callback returns
-     * @param mixed|null $default If no result is found, return this instead
-     * @return mixed
+     * @template TDefault
+     * @param (callable(TValue, TKey): mixed)|null $callable If provided will return the last value for which this
+     *   callback returns a truthy value
+     * @param TDefault $default If no result is found, return this instead
+     * @return TValue|TDefault
      */
     public function last(?callable $callable = null, mixed $default = null): mixed
     {
-        if (is_callable($callable) === false) {
-            $array = array_filter($this->getArrayCopy());
-            return empty($array) ? $default : end($array);
+        if ($callable === null) {
+            $callable = static fn ($item, $key) => $item;
         }
-        return $this->map($callable)->last(null, $default);
+        foreach (array_reverse($this->getArrayCopy(), true) as $key => $item) {
+            if ($callable($item, $key)) {
+                return $item;
+            }
+        }
+        return $default;
     }
 
     /**
      * Check if Collection Contains Value
      *
-     * @param mixed|callable $check
+     * Values are compared strictly. Use containsMatch() to search with a callback
+     *
+     * @param TValue $value
      * @return bool
      */
-    public function contains(mixed $check): bool
+    public function contains(mixed $value): bool
     {
-        if (is_callable($check)) {
-            return (bool)$this->first($check);
+        return in_array($value, $this->items, true);
+    }
+
+    /**
+     * Check if Collection Contains an Entry Matching Callable
+     *
+     * @param callable(TValue, array-key): mixed $callable Takes the value and then the key. Return a truthy value to
+     *   indicate a match
+     * @return bool
+     */
+    public function containsMatch(callable $callable): bool
+    {
+        foreach ($this->items as $key => $item) {
+            if ($callable($item, $key)) {
+                return true;
+            }
         }
-        return in_array($check, $this->getArrayCopy(), true);
+        return false;
     }
 
     /**
      * Pop Entity Off Of The End Of The Collection
      *
-     * @return mixed
+     * @return TValue|null
      */
     public function pop(): mixed
     {
-        $array  = $this->exchangeArray([]);
-        $popped = array_pop($array);
-        $this->exchangeArray($array);
-        return $popped;
+        return array_pop($this->items);
     }
 
     /**
@@ -350,7 +499,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param mixed ...$vals
      */
-    public function push(...$vals): void
+    public function push(mixed ...$vals): void
     {
         foreach ($vals as $val) {
             $this->append($val);
@@ -362,7 +511,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * Returns a new object which contains the original and new elements
      *
-     * @param Collection $add
+     * @param Collection<TKey, TValue> $add
      * @return static
      */
     public function merge(Collection $add): static
@@ -398,7 +547,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * Functions the same as uasort() if index types are constrained
      *
-     * @param callable(mixed, mixed): int $callable
+     * @param callable(TValue, TValue): int $callable
      * @return static
      */
     public function usort(callable $callable): static
@@ -418,7 +567,6 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param int $flags
      * @return static
      */
-    #[\ReturnTypeWillChange]
     public function asort(int $flags = SORT_REGULAR): static
     {
         $data = $this->getArrayCopy();
@@ -429,10 +577,9 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Collection With Contents Sorted, Maintaining Index Associations
      *
-     * @param callable(mixed, mixed): int $callable
+     * @param callable(TValue, TValue): int $callable
      * @return static
      */
-    #[\ReturnTypeWillChange]
     public function uasort(callable $callable): static
     {
         $data = $this->getArrayCopy();
@@ -448,11 +595,12 @@ class Collection extends ArrayObject implements JsonSerializable
      */
     public function shuffle(?int $seed = null): static
     {
-        if ($seed !== null) {
-            mt_srand($seed);
-        }
         $data = $this->getArrayCopy();
-        shuffle($data);
+        if ($seed !== null) {
+            $data = (new Randomizer(new Mt19937($seed)))->shuffleArray($data);
+        } else {
+            shuffle($data);
+        }
         return $this->getNewInstance($data);
     }
 
@@ -460,10 +608,10 @@ class Collection extends ArrayObject implements JsonSerializable
      * Join collection elements together with a string
      *
      * @param string $glue
-     * @param (callable(mixed, array-key): mixed)|null $callable
+     * @param (callable(TValue, TKey): mixed)|null $callable
      * @return string
      */
-    public function implode($glue = '', ?callable $callable = null): string
+    public function implode(string $glue = '', ?callable $callable = null): string
     {
         $array = $this->getArrayCopy();
         if ($callable) {
@@ -475,26 +623,15 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a New Instance of the Same Type
      *
-     * @param array<array-key, mixed> $data
+     * @param array<TKey, TValue> $data
      * @return static
      */
-    private function getNewInstance($data): static
+    private function getNewInstance(array $data): static
     {
-        $reflection = new ReflectionClass($this);
-        if ($reflection->isAnonymous() && $reflection->getFileName() === __FILE__) {
-            /** @var static $collection Our own typed collections are always the same anonymous class */
-            $collection = self::getTypedCollection($data, $this->keyType, $this->valueType);
-            return $collection;
-        }
-        if ($reflection->isAnonymous()) {
-            $clone = clone($this);
-            $clone->exchangeArray([]);
-            foreach ($data as $key => $value) {
-                $clone->offsetSet($key, $value);
-            }
-            return $clone;
-        }
-        return new static($data);
+        $clone = clone($this);
+        $clone->items = [];
+        $clone->fill($data);
+        return $clone;
     }
 
     /**
@@ -505,7 +642,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param mixed $data
      * @param ?string $keyType
      * @param ?string $valueType
-     * @return self
+     * @return Collection<array-key, mixed>
      */
     private static function getTypedCollection(
         mixed $data,
@@ -513,12 +650,7 @@ class Collection extends ArrayObject implements JsonSerializable
         ?string $valueType = null,
     ): Collection {
         return new class ($data, $keyType, $valueType) extends Collection {
-            /**
-             * @param mixed $data
-             * @param string|null $keyType
-             * @param string|null $valueType
-             */
-            public function __construct($data, $keyType, $valueType)
+            public function __construct(mixed $data, ?string $keyType, ?string $valueType)
             {
                 $this->keyType = $keyType;
                 $this->valueType = $valueType;
@@ -532,7 +664,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param string $valueType The type that all values must match
      * @param mixed $data
-     * @return self
+     * @return Collection<array-key, mixed>
      */
     public static function newTypedValueCollection(string $valueType, mixed $data = []): Collection
     {
@@ -544,7 +676,7 @@ class Collection extends ArrayObject implements JsonSerializable
      *
      * @param string $keyType The type that all keys must match
      * @param mixed $data
-     * @return self
+     * @return Collection<array-key, mixed>
      */
     public static function newTypedKeyCollection(string $keyType, mixed $data = []): Collection
     {
@@ -557,7 +689,7 @@ class Collection extends ArrayObject implements JsonSerializable
      * @param ?string $keyType The type that all keys must match
      * @param ?string $valueType The type that all values must match
      * @param mixed $data
-     * @return self
+     * @return Collection<array-key, mixed>
      */
     public static function newTypedCollection(?string $keyType, ?string $valueType, mixed $data = []): Collection
     {
@@ -567,7 +699,7 @@ class Collection extends ArrayObject implements JsonSerializable
     /**
      * Get a JSON Serializable Representation of this Collection
      *
-     * @return array<array-key, mixed>
+     * @return array<TKey, TValue>
      */
     public function jsonSerialize(): array
     {
